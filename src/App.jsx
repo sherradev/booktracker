@@ -14,7 +14,7 @@ function App() {
   if (checking) return <Loading/>; // or a loading spinner
 
   return (
-    <Router>
+    <Router basename="/mybookshelf/">
       {user ? (
         <>
           <Header />
