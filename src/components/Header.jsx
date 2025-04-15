@@ -26,9 +26,17 @@ export default function Header() {
               <h1 className="text-xl font-bold text-gray-800">Book Tracker</h1>
             </Link>
           </div>
-          <div className="flex items-center gap-4 md:hidden">
+          <div className="flex items-center md:hidden">
+            <Link to="/profile" className="mr-2">
+              <FontAwesomeIcon
+                icon={faUser}
+                size="lg"
+                className="cursor-pointer"
+              />
+            </Link>
             <button onClick={toggleSearch}>
               <FontAwesomeIcon
+              className=""
                 icon={showSearch ? faTimes : faSearch}
                 size="lg"
               />
@@ -40,7 +48,7 @@ export default function Header() {
         {showSearch && (
           <div className="w-full mt-4 md:hidden">
             <div className="flex items-center w-full border rounded-lg px-3 py-2">
-              <FontAwesomeIcon icon={faSearch} className="text-gray-500 mr-2" />
+              <FontAwesomeIcon icon={faSearch} className="mr-2" />
               <input
                 type="text"
                 value={searchTerm}
@@ -65,13 +73,13 @@ export default function Header() {
 
           {!showSearch && (
             <button onClick={toggleSearch}>
-              <FontAwesomeIcon icon={faSearch} size="lg" />
+              <FontAwesomeIcon icon={faSearch} size="lg" className=""/>
             </button>
           )}
 
           {showSearch && (
             <div className="flex items-center border rounded-lg px-3 py-1">
-              <FontAwesomeIcon icon={faSearch} className="text-gray-500 mr-2" />
+              <FontAwesomeIcon icon={faSearch} className="mr-2" />
               <input
                 type="text"
                 value={searchTerm}

@@ -15,12 +15,12 @@ const BookCard = ({ book }) => {
           <img src={thumbnail} alt={title} className="w-full h-48 object-cover" loading="lazy" />
         </Link>
       )}
-      <div className="p-4">
+      <div className="p-1 sm:p-4">
         <Link to={`/book/${bookId}`} className="hover:underline">
-          <h3 className="text-lg font-semibold mb-2 line-clamp-2">{title}</h3>
+          <h3 className="text-sm sm:text-lg font-semibold mb-2">{title}</h3>
         </Link>
         {authors.length > 0 && (
-          <p className="text-sm text-gray-600 line-clamp-1">
+          <p className="text-sm text-gray-600">
             By {authors.join(', ')}
           </p>
         )}

@@ -33,7 +33,7 @@ const Profile = () => {
   useEffect(() => { 
     if (user?.uid) { 
       const booksRef = collection(db, "users", user.uid, "books");
-      const q = query(booksRef, orderBy("userBookData.readDate", "desc")); // Initial sort by readDate for efficiency
+      const q = query(booksRef, orderBy("userBookData.readEnd", "desc")); // Initial sort by readDate for efficiency
 
       const unsubscribe = onSnapshot(
         q,
@@ -89,7 +89,7 @@ const Profile = () => {
     return <div>Error fetching books. Please try again later.</div>;
   }
   return (
-    <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-screen-xl mx-auto px-1 sm:px-6 lg:px-8">
  
         <div className="flex items-center justify-end mb-2">
           <img
@@ -108,12 +108,12 @@ const Profile = () => {
       <hr></hr>
       <div className="mt-4 mb-4">
         {readBooks.length > 0 ? ( 
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-4">
           {readBooks.map((book, index) => (
             <div 
               key={`read-${book.userBookData.bookId}`}
               className={`  ${index >= 3 ? "hidden md:block" : ""}
-                flex flex-col justify-between h-full border p-2 rounded shadow hover:shadow-md transition duration-200`}
+                flex flex-col justify-between h-full border p-1 sm:p-2 rounded shadow hover:shadow-md transition duration-200`}
             >
                    <BookCard book={book} />
             </div>
