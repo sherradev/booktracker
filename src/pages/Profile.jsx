@@ -22,7 +22,7 @@ const Profile = () => {
       .signOut()
       .then(() => {
         // Handle the promise from auth.signOut()
-        navigate("/login");
+        navigate("/");
       })
       .catch((error) => {
         // Handle any errors during sign-out
