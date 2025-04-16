@@ -8,19 +8,41 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import writeToFirestore from "../utils/update-collection";
-import { useState, useCallback, useRef } from "react";
-import {  Timestamp } from "firebase/firestore";  
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Timestamp } from "firebase/firestore";
 import FormatDate from "../utils/time-formatter";
-import ShareToInstagram from "../components/ShareToInstagram";
-import html2canvas from 'html2canvas'; 
+import html2canvas from "html2canvas";
 
-
-const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
+const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
   const { googleBookData, userBookData } = bookData;
 
   const [showModal, setShowModal] = useState(false);
+  // const [bookImgColor, setBookImgColor] = useState('');
   const shareRef = useRef(null);
-  
+  const bookImg = "https://covers.openlibrary.org/b/id/12738706-M.jpg";
+
+  useEffect(()=>{ 
+    // const imgRGB = getAverageColor(bookImg);  
+    // setBookImgColor(imgRGB);
+
+    const setGradient = async () => {
+      if (shareRef.current && bookImg) {
+          try {
+              const averageColor = await getAverageColor(bookImg);
+              // Create a subtle gradient using the average color
+              const gradient = `linear-gradient(to bottom, ${averageColor}, rgba(255,255,255,0.8))`;
+              shareRef.current.style.backgroundImage = gradient;
+              shareRef.current.style.backgroundColor = 'transparent'; 
+          } catch (error) {
+              console.error("Failed to calculate average color:", error); 
+              shareRef.current.style.backgroundImage = 'linear-gradient(to bottom, #cccccc, rgba(255,255,255,0.8))';
+          }
+      }
+  };
+  setGradient();
+  },[googleBookData]);
+ 
+
   const getDataToSave = useCallback(
     (updatedUserBookData) => {
       const {
@@ -29,10 +51,10 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
         imageLinks = null,
         industryIdentifiers = [],
         infoLink = "",
-        maturityRating = '',
+        maturityRating = "",
         pageCount = 0,
         publishedDate = "",
-        title = '',
+        title = "",
       } = bookData.googleBookData.volumeInfo;
       const baseUserData = {
         ...bookData.userBookData,
@@ -90,15 +112,19 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
     try {
       const toggledRead = !bookData.userBookData.read;
       const readDate = toggledRead ? Timestamp.now() : "";
- 
-    onUpdateBookData({
+
+      onUpdateBookData({
         read: toggledRead,
         readStart: readDate,
         readEnd: readDate,
         inDB: true,
       });
 
-      await saveUserBookDataToFirestore({ read: toggledRead, readStart: readDate, readEnd: readDate });
+      await saveUserBookDataToFirestore({
+        read: toggledRead,
+        readStart: readDate,
+        readEnd: readDate,
+      });
     } catch (error) {
       console.error("Error in handling read state", error);
     }
@@ -106,8 +132,8 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
 
   const handleLike = async () => {
     try {
-      const toggledLiked = !bookData.userBookData.liked; 
-    onUpdateBookData({ 
+      const toggledLiked = !bookData.userBookData.liked;
+      onUpdateBookData({
         liked: true,
         inDB: true,
       });
@@ -119,8 +145,8 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
 
   const handleAdd = async () => {
     try {
-      const toggledtToRead = !bookData.userBookData.toRead; 
-    onUpdateBookData({ 
+      const toggledtToRead = !bookData.userBookData.toRead;
+      onUpdateBookData({
         toRead: toggledtToRead,
         inDB: true,
       });
@@ -132,8 +158,8 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
 
   const handleRate = async (value) => {
     try {
-      const newValue = String(value); 
-    onUpdateBookData({ 
+      const newValue = String(value);
+      onUpdateBookData({
         rating: newValue,
         inDB: true,
       });
@@ -143,53 +169,88 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
     }
   };
 
-  const handleLogDateModal = ()=>{ 
-    onUpdateBookData({ 
-        readStart: FormatDate(new Date(), "yyyy-mm-dd"),
-        readEnd: FormatDate(new Date(), "yyyy-mm-dd"),  
-      });
-    setShowModal(prev=> !prev); 
-  }
-
-const handleDateChange = (event, field) => {
-    const newValue = event.target.value; 
-    console.log('val', newValue)
+  const handleLogDateModal = () => {
     onUpdateBookData({
-      [field]: newValue,  
+      readStart: FormatDate(new Date(), "yyyy-mm-dd"),
+      readEnd: FormatDate(new Date(), "yyyy-mm-dd"),
     });
-  }; 
- 
+    setShowModal((prev) => !prev);
+  };
+
+  const handleDateChange = (event, field) => {
+    const newValue = event.target.value;
+    console.log("val", newValue);
+    onUpdateBookData({
+      [field]: newValue,
+    });
+  };
 
   const handleShareBtn = async () => {
     if (shareRef.current) {
-//   const canvas = await html2canvas(shareRef.current);
-html2canvas(shareRef.current, {
-letterRendering: 1,
-logging: true, 
-useCORS: true,
-}).then(function(canvas) {
-var myImage  = canvas.toDataURL(); 
-var link = document.createElement("a");
+      try { 
+        const canvas = await html2canvas(shareRef.current, {
+          letterRendering: 1,
+          useCORS: true,
+        });
+        const myImage = canvas.toDataURL();
+        const link = document.createElement("a");
+  
+        link.download = "promo.png";
+        link.href = myImage; 
+        document.body.appendChild(link);
+        link.click(); 
+        document.body.removeChild(link);
+      } catch (error) {
+        console.error("Error capturing or downloading image:", error); 
+      }
+    }
+  };
 
-link.download = "promo.png";
-link.href = myImage;
-document.body.appendChild(link);
-link.click(); 
-console.log('i', myImage)
-});
-
-}
-}
-
-    const handleLogDate = async () => {
+  const handleLogDate = async () => {
     try {
-      await saveUserBookDataToFirestore({ readStart: userBookData.readStart, readEnd: userBookData.readEnd });
-      setShowModal(false); 
+      await saveUserBookDataToFirestore({
+        readStart: userBookData.readStart,
+        readEnd: userBookData.readEnd,
+      });
+      setShowModal(false);
     } catch (error) {
       console.error("Error saving log:", error);
     }
   };
 
+  
+  const getAverageColor = async (url) => {
+    const img = document.createElement('img');
+    img.crossOrigin = 'Anonymous';
+    img.src = url;
+   
+    await new Promise(resolve => {
+      img.onload = resolve;
+    });
+  
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '#000000';
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    let r = 0, g = 0, b = 0;
+    const length = data.length / 4;
+  
+    for (let i = 0; i < data.length; i += 4) {
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+    }
+  
+    r = Math.floor(r / length);
+    g = Math.floor(g / length);
+    b = Math.floor(b / length);
+  
+    return `rgb(${r}, ${g}, ${b})`;
+  };
 
   return (
     <div className="w-full md:w-auto border rounded p-4 shadow self-start">
@@ -248,76 +309,34 @@ console.log('i', myImage)
         >
           Log
         </button>
-        <button 
+        <button
           onClick={handleShareBtn}
-          className="w-full py-2 bg-gray-300 text-black rounded hover:bg-gray-400">
+          className="w-full py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
+        >
           Share
         </button>
       </div>
 
-      <div className="flex flex-col items-center"> 
-        <div
-          ref={shareRef}
-          style={{
-            width: 1080,
-            height: 1920,  
-            position: 'absolute',
-            top: '-9999px',
-            left: '-9999px',
-            background: `linear-gradient(135deg, ${`#cccccc`}, #ffffff)`
-          }}
-          className="flex flex-col justify-center items-center text-black p-8 rounded shadow-lg"
-        >
-          <div className="flex flex-row items-center w-full">
-          {googleBookData?.volumeInfo && (
-          <img  
-            src={
-                'https://covers.openlibrary.org/b/id/12738706-M.jpg'
-              }
-            alt={googleBookData.volumeInfo?.title || "Book Cover"}
-            className="w-1/3 h-auto object-contain"
-            onError={(e) => {
-              // Optional: Handle image loading errors, e.g., set a fallback image
-              e.target.onerror = null; // Prevent infinite loop 
-            }}
-          />
-        )}
-        {!googleBookData?.volumeInfo && (
-          <div className="w-1/3 h-auto flex items-center justify-center bg-gray-200">
-            <p className="text-gray-500">No Book Info</p>
-          </div>
-        )}
-            <div className="ml-8 flex-1">
-              <h1 className="text-4xl font-bold">{googleBookData.volumeInfo.title}</h1>
-              <h2 className="text-2xl mt-2">by  {googleBookData.volumeInfo.authors ? googleBookData.volumeInfo.authors.join(", "): "Unknown"}</h2>
-            </div>
-          </div>
-          <p>{userBookData.liked ? "Liked":"Nope"}</p>
-          <p className="mt-12 text-xl text-center max-w-lg">
-            
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam corporis asperiores mollitia ullam, quas atque illum. Placeat maxime odit at beatae facere, architecto blanditiis in similique laudantium, corporis sapiente dolorum.
-            </p>
-        </div>
-      </div>
+      
 
       {/* Modal */}
       {showModal && userBookData ? (
         <>
           <div className="fixed inset-0 bg-black opacity-50 z-40"></div>
           <div className="fixed inset-0 z-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded shadow-lg w-80 z-50"> 
-            <h2 className="text-lg font-semibold mb-4">Started Reading</h2>
+            <div className="bg-white p-6 rounded shadow-lg w-80 z-50">
+              <h2 className="text-lg font-semibold mb-4">Started Reading</h2>
               <input
                 type="date"
                 value={userBookData.readStart}
-                onChange={(e) => handleDateChange(e, 'readStart')}
+                onChange={(e) => handleDateChange(e, "readStart")}
                 className="w-full border p-2 rounded mb-4"
               />
-                 <h2 className="text-lg font-semibold mb-4">Finsihed Reading</h2>
+              <h2 className="text-lg font-semibold mb-4">Finsihed Reading</h2>
               <input
                 type="date"
                 value={userBookData.readEnd}
-                onChange={(e) => handleDateChange(e, 'readEnd')}
+                onChange={(e) => handleDateChange(e, "readEnd")}
                 className="w-full border p-2 rounded mb-4"
               />
               <div className="flex justify-end space-x-2">
@@ -337,8 +356,84 @@ console.log('i', myImage)
             </div>
           </div>
         </>
-      ) : ""}
+      ) : (
+        ""
+      )}
+
+      {/* Shareable/Downloadable content start */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div
+        ref={shareRef}
+        style={{
+          width: 1080,
+          height: 1920,
+          position: "absolute",
+          top: "-9999px",
+          left: "-9999px", 
+          overflow: 'hidden',
+          fontFamily: 'sans-serif'
+        }}
+      >
+       
+
+        {/* White Container Over Background */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 800,
+            height: 800,
+            padding: '2rem',
+            backgroundColor: 'white',
+            borderRadius: '1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            boxSizing: 'border-box',
+            boxShadow: '0 0 30px rgba(0,0,0,0.2)',
+            zIndex: 1
+          }}
+        >
+          {/* Row 1 */}
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <img
+            src={bookImg}
+              alt={googleBookData.volumeInfo?.title || "Book Cover"}
+              style={{ width: '33%', height: 'auto', objectFit: 'contain' }}
+              onError={(e) => {
+                e.target.onerror = null;
+              }}
+            />
+
+            <div style={{ marginLeft: '2rem', flex: 1 }}>
+              <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                {googleBookData.volumeInfo.title}
+              </h1>
+              <h2 style={{ fontSize: '1.5rem' }}>
+                by {googleBookData.volumeInfo.authors ? googleBookData.volumeInfo.authors.join(", ") : "Unknown"}
+              </h2>
+            </div>
+          </div>
+
+          {/* Row 2 */}
+          <div style={{ marginTop: '4rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>{userBookData.liked ? "Liked" : "Nope"}</p>
+            <p style={{ fontSize: '1.25rem', maxWidth: '700px', margin: '0 auto' }}>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam corporis asperiores mollitia ullam,
+              quas atque illum. Placeat maxime odit at beatae facere, architecto blanditiis in similique laudantium,
+              corporis sapiente dolorum.
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+      {/* Shareable/Downloadable content end */}
+ 
     </div>
   );
 };
+  
 export default BookMenu;

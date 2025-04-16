@@ -10,10 +10,8 @@ import BookMenu from "../components/BookMenu";
 export default function AboutBook() { 
   const { id: bookId } = useParams();
   const { user } = useUser(); 
-  const [loading, setLoading] = useState(false);
-  // const [hoverRating, setHoverRating] = useState(0);
-  const [expanded, setExpanded] = useState(false);
-  // const [isFirstBookSave, setIsFirstBookSave] = useState(false);
+  const [loading, setLoading] = useState(false); 
+  const [expanded, setExpanded] = useState(false); 
 
   const [bookData, setBookData] = useState({
     googleBookData: null,
