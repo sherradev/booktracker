@@ -8,14 +8,18 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import writeToFirestore from "../utils/update-collection";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {  Timestamp } from "firebase/firestore";  
 import FormatDate from "../utils/time-formatter";
+import ShareToInstagram from "../components/ShareToInstagram";
+import html2canvas from 'html2canvas'; 
+
 
 const BookMenu = ({ bookData, bookId, user, onUpdateBookData  }) => {
-  const { userBookData } = bookData;
+  const { googleBookData, userBookData } = bookData;
 
   const [showModal, setShowModal] = useState(false);
+  const shareRef = useRef(null);
   
   const getDataToSave = useCallback(
     (updatedUserBookData) => {
@@ -153,7 +157,29 @@ const handleDateChange = (event, field) => {
     onUpdateBookData({
       [field]: newValue,  
     });
-  };
+  }; 
+ 
+
+  const handleShareBtn = async () => {
+    if (shareRef.current) {
+//   const canvas = await html2canvas(shareRef.current);
+html2canvas(shareRef.current, {
+letterRendering: 1,
+logging: true, 
+useCORS: true,
+}).then(function(canvas) {
+var myImage  = canvas.toDataURL(); 
+var link = document.createElement("a");
+
+link.download = "promo.png";
+link.href = myImage;
+document.body.appendChild(link);
+link.click(); 
+console.log('i', myImage)
+});
+
+}
+}
 
     const handleLogDate = async () => {
     try {
@@ -222,9 +248,56 @@ const handleDateChange = (event, field) => {
         >
           Log
         </button>
-        <button className="disabled w-full py-2 bg-gray-300 text-black rounded hover:bg-gray-400">
+        <button 
+          onClick={handleShareBtn}
+          className="w-full py-2 bg-gray-300 text-black rounded hover:bg-gray-400">
           Share
         </button>
+      </div>
+
+      <div className="flex flex-col items-center"> 
+        <div
+          ref={shareRef}
+          style={{
+            width: 1080,
+            height: 1920,  
+            position: 'absolute',
+            top: '-9999px',
+            left: '-9999px',
+            background: `linear-gradient(135deg, ${`#cccccc`}, #ffffff)`
+          }}
+          className="flex flex-col justify-center items-center text-black p-8 rounded shadow-lg"
+        >
+          <div className="flex flex-row items-center w-full">
+          {googleBookData?.volumeInfo && (
+          <img  
+            src={
+                'https://covers.openlibrary.org/b/id/12738706-M.jpg'
+              }
+            alt={googleBookData.volumeInfo?.title || "Book Cover"}
+            className="w-1/3 h-auto object-contain"
+            onError={(e) => {
+              // Optional: Handle image loading errors, e.g., set a fallback image
+              e.target.onerror = null; // Prevent infinite loop 
+            }}
+          />
+        )}
+        {!googleBookData?.volumeInfo && (
+          <div className="w-1/3 h-auto flex items-center justify-center bg-gray-200">
+            <p className="text-gray-500">No Book Info</p>
+          </div>
+        )}
+            <div className="ml-8 flex-1">
+              <h1 className="text-4xl font-bold">{googleBookData.volumeInfo.title}</h1>
+              <h2 className="text-2xl mt-2">by  {googleBookData.volumeInfo.authors ? googleBookData.volumeInfo.authors.join(", "): "Unknown"}</h2>
+            </div>
+          </div>
+          <p>{userBookData.liked ? "Liked":"Nope"}</p>
+          <p className="mt-12 text-xl text-center max-w-lg">
+            
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam corporis asperiores mollitia ullam, quas atque illum. Placeat maxime odit at beatae facere, architecto blanditiis in similique laudantium, corporis sapiente dolorum.
+            </p>
+        </div>
       </div>
 
       {/* Modal */}
