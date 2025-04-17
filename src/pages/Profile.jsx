@@ -38,10 +38,8 @@ const Profile = () => {
       const unsubscribe = onSnapshot(
         q,
         (snapshot) => {
-          const fetchedBooks = [];
-          console.log('snapshot', snapshot)
-          snapshot.forEach((doc) => {
-            console.log('doc',doc.data())
+          const fetchedBooks = []; 
+          snapshot.forEach((doc) => { 
             fetchedBooks.push(doc.data());
           });
           setAllBooks(fetchedBooks);
@@ -60,8 +58,7 @@ const Profile = () => {
       setAllBooks([]);
     }
   }, [user]); 
-
-  console.log('allBooks',allBooks, user?.uid)
+ 
   const readBooks = allBooks
     .filter((book) => book.userBookData?.read)
     .sort(

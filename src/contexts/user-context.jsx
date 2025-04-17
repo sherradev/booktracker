@@ -11,8 +11,7 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-       // console.log('firebaseUser:', firebaseUser)
+      if (firebaseUser) { 
         setUser({
           uid: firebaseUser.uid, 
           displayName: firebaseUser.displayName ? firebaseUser.displayName.split(" ")[0] : "Guest", 
@@ -24,8 +23,7 @@ export const UserProvider = ({ children }) => {
       setChecking(false);
     });
     return () => unsubscribe();
-  }, []);
-   //console.log('USER:', user)
+  }, []); 
 
   // Memoize both user and checking
   const contextValue = useMemo(() => ({ user, checking }), [user, checking]);

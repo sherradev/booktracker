@@ -1,14 +1,7 @@
 import React, { useRef } from "react";  
-const ShareToInstagram = ({ bookData }) => {
-    // const [bgColor, setBgColor] = useState('');
-    // const [imgURL, setImgURL] = useState('');
+const ShareToInstagram = ({ bookData }) => { 
     const shareRef = useRef(null);
-    const { googleBookData, userBookData } = bookData;
-    // const [localCoverUrl, setLocalCoverUrl] = useState(null);
-    console.log('googleBookData',googleBookData)
- 
-   
-  
+    const { googleBookData, userBookData } = bookData; 
     
     return (
       <div className="flex flex-col items-center"> 

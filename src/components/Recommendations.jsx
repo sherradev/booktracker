@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
 
 const genres = [
-  { label: "Fiction", value: "fiction" },
-  { label: "Science", value: "science" },
-  { label: "History", value: "history" },
+  { label: "Fiction", value: "fiction" }, 
   { label: "Fantasy", value: "fantasy" },
   { label: "Mystery", value: "mystery" },
   { label: "Romance", value: "romance" },
@@ -22,7 +20,7 @@ const Recommendations = () => {
   const fetchBooks = async (genre, startIndex) => {
     setLoading(true);
     try {
-      let apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${genre}&orderBy=relevance&maxResults=${MAX_API_RESULTS}&startIndex=${startIndex}`;
+      let apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${genre}&printType=books&orderBy=newest&maxResults=${MAX_API_RESULTS}&startIndex=${startIndex}`;
       const res = await fetch(apiUrl);
       const data = await res.json();
       setBooks(data.items || []);
@@ -34,13 +32,12 @@ const Recommendations = () => {
   };
 
   const getRandomIndex = () => {
-    const maxPossibleStart = 200 - MAX_API_RESULTS;
-    const randomStartIndex =
-      Math.floor(Math.random() * (maxPossibleStart / MAX_API_RESULTS + 1)) *
-      MAX_API_RESULTS;
-    const safeStartIndex = Math.max(0, randomStartIndex); // Ensure startIndex is not negative
+    const maxPossibleStart =  MAX_API_RESULTS;
+    const randomValue = Math.floor(Math.random() * (maxPossibleStart + 1));  
+    const safeStartIndex = Math.max(0, randomValue);  
     return safeStartIndex;
   };
+
   const handleRefresh = () => {
     // Get a random genre
     const randomIndex = Math.floor(Math.random() * genres.length);
