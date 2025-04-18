@@ -1,34 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { auth, provider, signInWithPopup } from "../config/firebase-config";
+import React, { useState } from "react";
+import { signInAnonymously } from "firebase/auth";
+import { auth, provider, signInWithRedirect } from "../config/firebase-config";
 import Loading from "../components/Loading"; 
 import { useNavigate } from "react-router-dom"; 
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [user, setUser] = useState(null);
-
+  const [errorMessage, setErrorMessage] = useState(null);  
   const navigate = useNavigate();
-
-  // Check if user is logged in when component mounts
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    // Clean up the subscription on unmount
-    return () => unsubscribe();
-  }, []);
-
+ 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorMessage(null);
 
     try {
-      const result = await signInWithPopup(auth, provider);
-      const loggedInUser = result.user;
-      setUser(loggedInUser);
+      const result = await signInWithRedirect(auth, provider);
+      console.log("User Info:", result); // Log user details  
       navigate("/");
     } catch (error) {
       console.error("Google Sign-In Error:", error);
@@ -64,18 +51,7 @@ const Login = () => {
         <div className="text-center">
           <p className="text-2xl font-semibold text-gray-800 mb-6">
             Welcome to Bookshelf
-          </p>
-
-          {user && (
-            <div className="mb-4">
-              <button
-                onClick={() => auth.signOut()}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Sign out
-              </button>
-            </div>
-          )}
+          </p> 
 
           <div className="mb-4">
             <button
