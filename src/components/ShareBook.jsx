@@ -146,7 +146,7 @@ const ShareBook = ({ googleBookData, userBookData, user }) => {
         });
         const myImage = canvas.toDataURL();
         const link = document.createElement("a");
-        link.download = "promo.png";
+        link.download = "bookshelf_review.png";
         link.href = myImage;
         document.body.appendChild(link);
         link.click();
@@ -321,7 +321,8 @@ const ShareBook = ({ googleBookData, userBookData, user }) => {
                     // height: "370px",
                     minWidth: "250px",
                     maxWidth: "370px",
-                    minHeight: "370px",
+                    minHeight: "360px",
+                    maxHeight: "370px",
                     backgroundColor: "#fff",
                     padding: "10px",
                     overflow: "hidden",

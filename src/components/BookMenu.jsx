@@ -175,16 +175,17 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
 
   const submitLogValues = async () => {
     try {
-      // await saveUserBookDataToFirestore({
-      //   readStart: userBookData.readStart,
-      //   readEnd: userBookData.readEnd,
-      //   review: reviewText ? reviewText : ""
-      // });
-      console.log('test', {
+      onUpdateBookData({
+        readStart: userBookData.readStart,
+        readEnd: userBookData.readEnd,
+        review: reviewText ? reviewText : "",
+        inDB: true,
+      });
+      await saveUserBookDataToFirestore({
         readStart: userBookData.readStart,
         readEnd: userBookData.readEnd,
         review: reviewText ? reviewText : ""
-      })
+      }); 
       setShowModal(false);
     } catch (error) {
       console.error("Error saving log:", error);
