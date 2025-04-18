@@ -96,11 +96,10 @@ const Profile = () => {
             referrerPolicy="no-referrer"
             className="w-10 h-10 rounded-full mr-4"
           />
-          <span className="absolute top-1/5 left-1/4">G</span>
-          </div>
-         
-
-          <h2>{user.displayName}</h2>
+          {user.photoURL ? "" : <span className="absolute top-1/5 left-1/4">G</span>} 
+          </div> 
+          <h2>
+          {user.displayName}</h2>
           <div className="ml-auto">
             <button onClick={handleSignOut}>Sign out</button>
           </div>
