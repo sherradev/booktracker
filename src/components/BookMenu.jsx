@@ -5,18 +5,27 @@ import {
   faPlus,
   faCheck,
   faStar,
-} from "@fortawesome/free-solid-svg-icons";
+  faStarHalfAlt
+} from "@fortawesome/free-solid-svg-icons"; 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import writeToFirestore from "../utils/update-collection";
 import { useState, useCallback } from "react";
 import { Timestamp } from "firebase/firestore";
 import FormatDate from "../utils/time-formatter";
 import ShareBook from "./ShareBook";
-
+import Modal from "./Modal";
 
 const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
-  const { googleBookData, userBookData } = bookData; 
-  const [showModal, setShowModal] = useState(false); 
+  const { googleBookData, userBookData } = bookData;
+  const [showModal, setShowModal] = useState(false);
+  const [reviewText, setReviewText] = useState("");
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const characterLimit = 280, max = 5; 
+  const [hoverValue, setHoverValue] = useState(null);
+
+  const reviewTextStyle = {
+    color: reviewText.length > characterLimit ? "red" : "inherit",
+  };
 
   const getDataToSave = useCallback(
     (updatedUserBookData) => {
@@ -131,7 +140,7 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
   };
 
   const handleRate = async (value) => {
-    try {
+    try { 
       const newValue = String(value);
       onUpdateBookData({
         rating: newValue,
@@ -143,12 +152,15 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
     }
   };
 
-  const handleLogDateModal = () => {
+  const openLogDateModal = () => {
+    const rev = userBookData.review ? userBookData.review : "";
     onUpdateBookData({
       readStart: FormatDate(new Date(), "yyyy-mm-dd"),
       readEnd: FormatDate(new Date(), "yyyy-mm-dd"),
+      review: rev
     });
-    setShowModal((prev) => !prev);
+    setReviewText(rev); 
+    setShowModal(true);
   };
 
   const handleDateChange = (event, field) => {
@@ -158,17 +170,44 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
     });
   };
 
-
-  const handleLogDate = async () => {
+  const submitLogValues = async () => {
     try {
-      await saveUserBookDataToFirestore({
+      // await saveUserBookDataToFirestore({
+      //   readStart: userBookData.readStart,
+      //   readEnd: userBookData.readEnd,
+      //   review: reviewText ? reviewText : ""
+      // });
+      console.log('test', {
         readStart: userBookData.readStart,
         readEnd: userBookData.readEnd,
-      });
+        review: reviewText ? reviewText : ""
+      })
       setShowModal(false);
     } catch (error) {
       console.error("Error saving log:", error);
     }
+  };
+
+  const handleChangeReview = (event) => {
+    const newValue = event.target.value;
+    setReviewText(newValue);
+
+    if (newValue.length > characterLimit) {
+      setIsSubmitDisabled(true);
+    } else {
+      setIsSubmitDisabled(newValue.length === 0); // Disable if empty
+    }
+  };
+ 
+  const handleMouseMove = (e, index) => {
+    const { left, width } = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - left;
+    const hoverVal = x < width / 2 ? index + 0.5 : index + 1;
+    setHoverValue(hoverVal);
+  };
+
+  const handleMouseLeave = () => {
+    setHoverValue(null);
   };
 
   return (
@@ -202,76 +241,99 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
 
       {/* Rating */}
       <div className="flex justify-center mb-4">
-        {[1, 2, 3, 4, 5].map((value) => (
-          <FontAwesomeIcon
-            key={value}
-            icon={faStar}
-            className={`star-icon cursor-pointer text-xl ${
-              Number(bookData.userBookData.rating) >= value
-                ? "text-yellow-400"
-                : "text-gray-300"
-            }`}
-            onClick={() => handleRate(value)}
-            style={{
-              "--rating-value": Number(bookData.userBookData.rating),
-              "--hover-value": 0 /* Initialize hover value */,
-            }}
-          />
-        ))}
+      <div className="star-rating">
+      {[...Array(max)].map((_, i) => {
+        const value = i + 1;
+        const current = hoverValue ?? Number(userBookData.rating);
+
+        let icon = faStar;
+        let colorClass = "text-gray-300";
+
+        if (current >= value) {
+          colorClass = "text-yellow-400";
+        } else if (current >= value - 0.5) {
+          icon = faStarHalfAlt;
+          colorClass = "text-yellow-400";
+        }
+
+        return (
+          <span
+            key={i}
+            className="cursor-pointer text-xl"
+            onClick={() => handleRate(current >= value ? value : value - 0.5)}
+            onMouseMove={(e) => handleMouseMove(e, i)}
+            onMouseLeave={handleMouseLeave}
+          >
+            <FontAwesomeIcon icon={icon} className={colorClass} />
+          </span>
+        );
+      })}
+    </div>
       </div>
 
       {/* Buttons */}
       <div className="space-y-2">
         <button
-          onClick={handleLogDateModal}
+          onClick={openLogDateModal}
           className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Log
+          Review or Log
         </button>
-        <ShareBook googleBookData={googleBookData} userBookData={userBookData}/> 
+        <ShareBook
+          googleBookData={googleBookData}
+          userBookData={userBookData}
+          user={user}
+        />
       </div>
 
       {/* Modal */}
       {showModal && userBookData ? (
         <>
-          <div className="fixed inset-0 bg-black opacity-50 z-40"></div>
-          <div className="fixed inset-0 z-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded shadow-lg w-80 z-50">
-              <h2 className="text-lg font-semibold mb-4">Started Reading</h2>
-              <input
-                type="date"
-                value={userBookData.readStart}
-                onChange={(e) => handleDateChange(e, "readStart")}
-                className="w-full border p-2 rounded mb-4"
-              />
-              <h2 className="text-lg font-semibold mb-4">Finsihed Reading</h2>
-              <input
-                type="date"
-                value={userBookData.readEnd}
-                onChange={(e) => handleDateChange(e, "readEnd")}
-                className="w-full border p-2 rounded mb-4"
-              />
-              <div className="flex justify-end space-x-2">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleLogDate}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Save
-                </button>
-              </div>
+          <Modal>
+            <h2 className="text-lg font-semibold mb-4">Started</h2>
+            <input
+              type="date"
+              value={userBookData.readStart}
+              onChange={(e) => handleDateChange(e, "readStart")}
+              className="w-full border p-2 rounded mb-4"
+            />
+            <h2 className="text-lg font-semibold mb-4">Finished</h2>
+            <input
+              type="date"
+              value={userBookData.readEnd}
+              onChange={(e) => handleDateChange(e, "readEnd")}
+              className="w-full border p-2 rounded mb-4"
+            />
+            <h2 className="text-lg font-semibold mb-4">Review</h2>
+            <textarea
+              onChange={handleChangeReview}
+              className="w-full border p-2 rounded mb-4 h-[258px] resize-none"
+              value={reviewText}
+            />
+            <label style={reviewTextStyle}>
+              {reviewText.length} / {characterLimit} characters
+            </label>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={isSubmitDisabled}
+                onClick={submitLogValues}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Save
+              </button>
             </div>
-          </div>
+          </Modal>
         </>
       ) : (
         ""
       )}
- 
     </div>
   );
 };

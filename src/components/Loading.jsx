@@ -1,8 +1,9 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 export default function Loading() {
-    return (
-      <div className="flex justify-center items-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-600"></div>
-      </div>
-    );
-  }
-  
+  return (
+  <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center bg-gray-200/50 z-50">
+               <FontAwesomeIcon icon={faSpinner} spin={true} size="2xl" color={'#2b7fff'}/>
+  </div>
+  );
+ }

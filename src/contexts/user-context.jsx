@@ -15,7 +15,7 @@ export const UserProvider = ({ children }) => {
         setUser({
           uid: firebaseUser.uid, 
           displayName: firebaseUser.displayName ? firebaseUser.displayName.split(" ")[0] : "Guest", 
-          photoURL: firebaseUser.photoURL ? firebaseUser.photoURL : "https://dummyimage.com/96x96", 
+          photoURL: firebaseUser.photoURL ? firebaseUser.photoURL : "", 
         });
       } else {
         setUser(null);

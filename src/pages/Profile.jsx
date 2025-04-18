@@ -89,14 +89,18 @@ const Profile = () => {
     <div className="max-w-screen-xl mx-auto px-1 sm:px-6 lg:px-8">
  
         <div className="flex items-center justify-end mb-2">
+          <div className="relative">
           <img
-            src={user.photoURL}
+            src={user.photoURL ? user.photoURL : `https://dummyimage.com/40x40/d2d3d9/d2d3d9`}
             alt={`${user.displayName}'s Profile`}
             referrerPolicy="no-referrer"
             className="w-10 h-10 rounded-full mr-4"
           />
+          <span className="absolute top-1/5 left-1/4">G</span>
+          </div>
+         
 
-          <h2>Hello {user.displayName}</h2>
+          <h2>{user.displayName}</h2>
           <div className="ml-auto">
             <button onClick={handleSignOut}>Sign out</button>
           </div>

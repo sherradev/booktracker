@@ -7,6 +7,7 @@ import AboutBook from "./pages/AboutBook";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import SearchResults from "./pages/SearchResults";
+import Loading from "./components/Loading";
 
 function App() {
   const { user, checking } = useUser();
@@ -16,9 +17,9 @@ function App() {
   return (
     <Router>
       {user ? (
-        <>
+        <div className="flex flex-col min-h-screen">
           <Header />
-          <main className="p-4 overflow-auto">
+          <main className="p-4 overflow-auto flex-grow">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/book/:id" element={<AboutBook />} />
@@ -28,7 +29,7 @@ function App() {
             </Routes>
           </main>
           <Footer/>
-        </>
+        </div>
       ) : (
         <Routes>
               <Route path="/" element={<Login />} />  

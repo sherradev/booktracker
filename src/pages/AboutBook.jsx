@@ -22,6 +22,7 @@ export default function AboutBook() {
       toRead: false,
       inDB: false,
       rating: "", 
+      review: "",
       readStart: "",
       readEnd: "",
       userId: "",
@@ -77,6 +78,7 @@ export default function AboutBook() {
               toRead: userState?.userBookData.toRead ?? false,
               inDB: userState?.userBookData.inDB ?? false,
               rating: userState?.userBookData.rating ?? "", 
+              review: userState?.userBookData.review ?? "", 
               readStart: userState?.userBookData.readStart ?? "",
               readEnd: userState?.userBookData.readEnd ?? "",
               userId: userState?.userBookData.userId ?? user.uid,
@@ -120,7 +122,7 @@ export default function AboutBook() {
     <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-start flex-row">
         {/*-------- First Column: Image with Set Width --------*/}
-        <div className="w-40 shrink-0">
+        <div className="w-30 shrink-0">
           <img
             src={
               googleBookData.volumeInfo.imageLinks?.thumbnail ||
@@ -134,16 +136,16 @@ export default function AboutBook() {
         {/*-------- Second Column: Title & Auuthor --------*/}
         <div className="flex-grow px-4">
           {/* Add some horizontal padding */}
-          <h1 className="text-2xl font-bold mb-4">
+          <h1 className="text-lg sm:text-2xl font-bold mb-1 w-full">
             {googleBookData.volumeInfo.title}
           </h1>
-          <p className="text-lg font-semibold mb-2">
-            Authors: {googleBookData.volumeInfo.authors ? googleBookData.volumeInfo.authors.join(", "): "Unknown"}
+          <p className="text-sm sm:text-lg font-semibold mb-2 w-full">
+             {googleBookData.volumeInfo.authors ? (<span>{`By ${googleBookData.volumeInfo.authors.join(", ")}`}</span>): ""}
           </p>
         </div>
 
         {/*-------- Third Column: Button with Content-Based Width --------*/}
-        <div className="ml-auto hidden sm:block">  
+        <div className="w-60 ml-auto hidden sm:block">  
           {bookData ?  <BookMenu onUpdateBookData={handleUpdateBookData} bookData={bookData} bookId={bookId} user={user}/>  : ''}
         </div>
       </div>

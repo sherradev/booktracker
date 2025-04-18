@@ -1,21 +1,36 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 export default function Header() {
   const [showSearch, setShowSearch] = useState(false);
-
-  const toggleSearch = () => setShowSearch((prev) => !prev);
+  const mobileSearchInputRef = useRef(null); // Ref for the mobile input
+  const desktopSearchInputRef = useRef(null); // Ref for the desktop input
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
+  const toggleSearch = () => {
+    setShowSearch((prev) => !prev);  
+  };
+ 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && searchTerm.trim()) {
       navigate(`/results?q=${encodeURIComponent(searchTerm.trim())}`);
       setSearchTerm(""); // optional: clear input
+      setShowSearch(false);
     }
-  };
+  }; 
+
+   useEffect(() => {
+    if (showSearch) {
+      if (window.innerWidth < 768 && mobileSearchInputRef.current) {
+        mobileSearchInputRef.current.focus();
+      } else if (window.innerWidth >= 768 && desktopSearchInputRef.current) {
+        desktopSearchInputRef.current.focus();
+      }
+    }
+  }, [showSearch]);
 
   return (
     <header className="w-full py-4 bg-white shadow-md">
@@ -52,6 +67,7 @@ export default function Header() {
               <input
                 type="text"
                 value={searchTerm}
+                ref={mobileSearchInputRef} // Use the mobile ref
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search..."
@@ -83,6 +99,7 @@ export default function Header() {
               <input
                 type="text"
                 value={searchTerm}
+                ref={desktopSearchInputRef} // Use the desktop ref
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search..."

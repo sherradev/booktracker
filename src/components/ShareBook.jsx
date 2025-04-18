@@ -1,17 +1,25 @@
 import { useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import Modal from "./Modal";
+import FormatDate from "../utils/time-formatter";
+import {
+  faUser,
+  faStar,
+  faStarHalfAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Loading from "../components/Loading";
 
-const ShareBook = ({ googleBookData, userBookData }) => {
+const ShareBook = ({ googleBookData, userBookData, user }) => {
   const shareRef = useRef(null);
   const fallback = "https://dummyimage.com/275x400?text=No+Image";
   const [imgURL, setImgURL] = useState(fallback);
-  const [isImgReady, setIsImgReady] = useState(false);
+  // const [isImgReady, setIsImgReady] = useState(false);
   const [showEditionsModal, setShowEditionsModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [editionList, setEditionList] = useState([]);
   const { volumeInfo } = googleBookData;
-  // console.log('volumeInfo',volumeInfo)
-  // console.log('userBookData',userBookData)
+  // console.log('volumeInfo',volumeInfo) 
 
   const searchImgFronOpenLibrary = async () => {
     const author = volumeInfo.authors.length
@@ -37,7 +45,10 @@ const ShareBook = ({ googleBookData, userBookData }) => {
             coverId: bookItem.covers?.[0] ?? null, // Safe access with optional chaining
             imgUrl: `https://covers.openlibrary.org/b/id/${bookItem.covers?.[0]}-L.jpg`,
           }))
-          .filter((item) => item.coverId !== null);
+          .filter(
+            (item) =>
+              item.coverId !== null && String(Math.abs(item.coverId)).length > 1
+          ); 
         return finalData;
       } else {
         return [];
@@ -115,7 +126,6 @@ const ShareBook = ({ googleBookData, userBookData }) => {
 
         const gradient = `linear-gradient(to top, ${darker}, ${averageColor}, ${lighter})`;
         ref.current.style.backgroundImage = gradient;
-        setIsImgReady(true);
       } catch (error) {
         console.error("Gradient fallback triggered:", error);
         ref.current.style.backgroundImage = `linear-gradient(to top, #cccccc, rgba(255,255,255,0.8))`;
@@ -124,8 +134,9 @@ const ShareBook = ({ googleBookData, userBookData }) => {
   };
 
   const downloadBook = async (book) => {
+    setLoading(true);
     setImgURL(book.imgUrl);
-    try { 
+    try {
       await setupGradient(shareRef, book.imgUrl); // Await gradient application
 
       if (shareRef.current) {
@@ -143,31 +154,73 @@ const ShareBook = ({ googleBookData, userBookData }) => {
       }
     } catch (error) {
       console.error("Error during download process:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const rating = parseFloat(
+    userBookData && userBookData.rating ? userBookData.rating : "0"
+  );
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+
+  const stars = [];
+
+  for (let i = 0; i < fullStars; i++) {
+    stars.push(
+      <FontAwesomeIcon
+        key={`full-${i}`}
+        icon={faStar}
+        style={{ fontSize: "1.4em", color: "#FFD500" }}
+      />
+    );
+  }
+
+  if (hasHalfStar) {
+    stars.push(
+      <FontAwesomeIcon
+        key="half"
+        icon={faStarHalfAlt}
+        style={{ fontSize: "1.2em", color: "#FFD500" }}
+      />
+    );
+  }
+
+  // const emptyStars = totalStars - fullStars - (hasHalfStar ? 1 : 0);
+  // for (let i = 0; i < emptyStars; i++) {
+  //   stars.push(
+  //     <FontAwesomeIcon
+  //       key={`empty-${i}`}
+  //       icon={faStar}
+  //       style={{ fontSize: "1.2em", color: "#D1D5DB" }} // Tailwind gray-300
+  //     />
+  //   );
+  // }
+
   return (
     <div>
-      <button
-        onClick={handleShareBtn}
-        className={`w-full py-2  text-black rounded hover:bg-gray-400 ${
-          isImgReady ? "bg-gray-300" : "bg-red-500"
-        }`}
-      >
-        Share
-      </button>
+      {volumeInfo.authors && volumeInfo.authors.length ? (
+        <button
+          onClick={handleShareBtn}
+          className={`w-full py-2  text-white rounded hover:bg-gray-400 bg-green-600`}
+        >
+          Share
+        </button>
+      ) : (
+        ""
+      )}
 
       {showEditionsModal ? (
         <Modal>
           <div className="flex flex-col">
-          {editionList.length ? (
-                <h5>Select image to download</h5>
-              ) : (
-                <h5>No covers found in Open Library</h5>
-              )}
+            {editionList.length ? (
+              <h5>Select image to download</h5>
+            ) : (
+              <h5>No covers found in Open Library</h5>
+            )}
             <div className="overflow-auto h-96">
-            
-
+              {loading ? <Loading /> : ""}
               <div className="grid grid-cols-2 gap-1 mt-2">
                 {editionList.length ? (
                   <>
@@ -182,7 +235,13 @@ const ShareBook = ({ googleBookData, userBookData }) => {
                         >
                           <div className="rounded overflow-hidden">
                             <img
+                              alt="Book Cover"
                               src={book.imgUrl}
+                              onError={(e) => {
+                                e.target.onerror = null; // Prevent infinite loop in some browsers
+                                e.target.src =
+                                  "https://dummyimage.com/130x200?text=No+Image";
+                              }}
                               className="w-full h-full object-cover transform transition duration-200 hover:scale-105"
                             />
                           </div>
@@ -209,28 +268,22 @@ const ShareBook = ({ googleBookData, userBookData }) => {
         ""
       )}
 
-      {/* SHARABLE LAYOUT */}
-      <div
-        style={{
-          display: "flex", //none
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+      <div className="flex flex-col items-center">
+        {/* SHAREABLE LAYOUT - LIMITED TAILWIND CLASSES USAGE*/}
         <div
           ref={shareRef}
           id="share-el"
+          className=""
           style={{
             width: 1080,
             height: 1920,
             position: "absolute",
             backgroundColor: "pink",
-            // top: "61px",
-            // left: "0",
+            overflow: "hidden",
             top: "-9999px",
             left: "-9999px",
-            overflow: "hidden",
-            fontFamily: "sans-serif",
+            // top: "61px",
+            // left: "0"
           }}
         >
           <div
@@ -242,13 +295,13 @@ const ShareBook = ({ googleBookData, userBookData }) => {
               bottom: 0,
               margin: "auto",
               width: 800,
-              height: 800,
+              height: 750,
               backgroundColor: "#F6F6F6",
               borderRadius: "1rem",
               boxSizing: "border-box",
-              boxShadow: "0 0 30px rgba(0,0,0,0.2)",
               zIndex: 1,
               padding: 40,
+              overflow: "hidden",
             }}
           >
             <div
@@ -265,13 +318,20 @@ const ShareBook = ({ googleBookData, userBookData }) => {
               >
                 <div
                   style={{
-                    width: "275px",
+                    // height: "370px",
+                    minWidth: "250px",
+                    maxWidth: "370px",
+                    minHeight: "370px",
                     backgroundColor: "#fff",
-                    boxShadow: "0 0 30px rgba(0,0,0,0.2)",
                     padding: "10px",
+                    overflow: "hidden",
                   }}
                 >
-                  <img src={imgURL} alt="Book cover" />
+                  <img
+                    src={imgURL}
+                    alt="Book cover"
+                    style={{ minWidth: 230 }}
+                  />
                 </div>
 
                 <div
@@ -279,22 +339,98 @@ const ShareBook = ({ googleBookData, userBookData }) => {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    paddingLeft: "15px",
+                    paddingLeft: "20px",
                   }}
                 >
                   <div>
-                    <div>User</div>
-                    <div>{volumeInfo.title}</div>
-                    <div>
-                     By {volumeInfo.authors ? volumeInfo.authors.join(", "): "Unknown"}
+                    <div style={{ marginTop: 10 }}>
+                      <div style={{ display: "flex", flexDirection: "row" }}>
+                        <FontAwesomeIcon
+                          style={{ fontSize: "1.75em", color: "#bebebe" }}
+                          icon={faUser}
+                        />
+                        <div
+                          style={{
+                            marginLeft: "10px",
+                            position: "relative",
+                            top: "-15px",
+                            fontSize: "1.5em",
+                            color: "#686868",
+                          }}
+                        >
+                          {user.displayName.toLowerCase()}
+                        </div>
+                      </div>
                     </div>
-                    <div>Star</div>
+
+                    <h1
+                      style={{
+                        fontSize: "2.5em",
+                        fontWeight: "bold",
+                        color: "#2C2C2C",
+                        marginTop: "-10px",
+                        marginBottom: "10px",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {volumeInfo.title}
+                    </h1>
+                    <div
+                      style={{
+                        fontSize: "1.5em",
+                        color: "#686868",
+                      }}
+                    >
+                      By{" "}
+                      {volumeInfo.authors
+                        ? volumeInfo.authors.join(", ")
+                        : "Unknown"}
+                    </div>
+                    <div style={{ marginTop: "20px" }}>{stars}</div>
                   </div>
-                  <div>Read date</div>
+                  <div
+                    style={{
+                      fontSize: "1.6em",
+                      color: "#686868",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    {userBookData && userBookData.readEnd
+                      ? `Read on ${FormatDate(
+                          userBookData.readEnd,
+                          "mmm d, yyyy"
+                        )}`
+                      : ""}
+                  </div>
                 </div>
               </div>
-              <h1>Review</h1>
-              <div>Row 2</div>
+              <h1
+                style={{
+                  fontSize: "1.9em",
+                  fontWeight: "bold",
+                  color: "#2C2C2C",
+                  marginTop: "10px",
+                }}
+              >
+                Review
+              </h1>
+              <div
+                style={{
+                  fontSize: "1.7em",
+                  color: "#2C2C2C",
+                  marginTop: "10px",
+                  height: 220,
+                  overflow: "hidden",
+                }}
+              >
+                {userBookData && userBookData.review ? (
+                  <span style={{ color: "#686868" }}>
+                    {userBookData.review}
+                  </span>
+                ) : (
+                  <span style={{ color: "#686868" }}>No review to display</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
