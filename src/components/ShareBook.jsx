@@ -203,7 +203,7 @@ const ShareBook = ({ googleBookData, userBookData, user }) => {
       {volumeInfo.authors && volumeInfo.authors.length ? (
         <button
           onClick={handleShareBtn}
-          className={`w-full py-2  text-white rounded hover:bg-gray-400 bg-green-600`}
+          className={`w-full py-2  text-white rounded hover:bg-green-800 bg-green-600`}
         >
           Share
         </button>

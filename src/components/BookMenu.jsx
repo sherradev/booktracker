@@ -139,9 +139,12 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
     }
   };
 
-  const handleRate = async (value) => {
+  const handleRate = async (e, i) => {
     try { 
-      const newValue = String(value);
+      const { left, width } = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - left;
+      const isHalf = x < width / 2;
+      const newValue = isHalf ? i + 0.5 : i + 1;  
       onUpdateBookData({
         rating: newValue,
         inDB: true,
@@ -232,9 +235,7 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
         />
         <FontAwesomeIcon
           icon={userBookData.toRead ? faCheck : faPlus}
-          className={`cursor-pointer text-xl ${
-            userBookData.toRead ? "text-green-600" : "text-green-400"
-          }`}
+          className={`cursor-pointer text-xl text-green-600`}
           onClick={handleAdd}
         />
       </div>
@@ -260,7 +261,7 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
           <span
             key={i}
             className="cursor-pointer text-xl"
-            onClick={() => handleRate(current >= value ? value : value - 0.5)}
+            onClick={(e) => handleRate(e, i)}
             onMouseMove={(e) => handleMouseMove(e, i)}
             onMouseLeave={handleMouseLeave}
           >
@@ -275,7 +276,7 @@ const BookMenu = ({ bookData, bookId, user, onUpdateBookData }) => {
       <div className="space-y-2">
         <button
           onClick={openLogDateModal}
-          className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="w-full py-2 text-white rounded bg-black hover:bg-gray-900 "
         >
           Review or Log
         </button>

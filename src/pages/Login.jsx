@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { signInAnonymously } from "firebase/auth";
-import { auth, provider, signInWithRedirect } from "../config/firebase-config";
+import { auth, provider, signInWithPopup } from "../config/firebase-config";
 import Loading from "../components/Loading"; 
 import { useNavigate } from "react-router-dom"; 
 
@@ -12,10 +12,12 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorMessage(null);
+    console.log("yo"); // Log user details  
 
-    try {
-      const result = await signInWithRedirect(auth, provider);
-      console.log("User Info:", result); // Log user details  
+    try { 
+      console.log("User provider!:", provider); // Log user details  
+      const result = await signInWithPopup(auth, provider);
+      console.log("User Info!:", result); // Log user details  
       navigate("/");
     } catch (error) {
       console.error("Google Sign-In Error:", error);
@@ -55,7 +57,7 @@ const Login = () => {
 
           <div className="mb-4">
             <button
-              className="inline-flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
+              className="flex items-center w-full justify-center text-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"
               onClick={handleGoogleSignIn}
             >
               <svg
@@ -93,9 +95,8 @@ const Login = () => {
           <div>
             <button
               onClick={signInGuest}
-              className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              Continue as Guest
+              className="bg-black hover:bg-gray-900 w-full text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >Continue as Guest
             </button>
           </div>
         </div>
