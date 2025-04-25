@@ -5,13 +5,30 @@ import { doc, getDoc } from "firebase/firestore";
 import { useUser } from "../contexts/user-context";
 import Loading from "../components/Loading"; 
 import BookMenu from "../components/BookMenu";
- 
+import { useBookCovers } from "../contexts/covers-context";
+import getCovers from "../utils/get-covers";
+import BookCover from "../components/BookCover";
+import BookModal from "../components/BookModal";
+  
+const fetchBookUserState = async (bookId, userId) => {
+  try { 
+    const docRef = doc(db, "users", userId, "books", bookId);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? docSnap.data() : null;
+  } catch (error) {
+    console.error("Error fetching user book state:", error);
+    return null;
+  }
+}; 
 
 export default function AboutBook() { 
   const { id: bookId } = useParams();
   const { user } = useUser(); 
+  const {setCovers} = useBookCovers();
   const [loading, setLoading] = useState(false); 
   const [expanded, setExpanded] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
+  // const [bookCovers, setBookCovers] = useState([]); 
 
   const [bookData, setBookData] = useState({
     googleBookData: null,
@@ -25,6 +42,7 @@ export default function AboutBook() {
       review: "",
       readStart: "",
       readEnd: "",
+      bookCover: "",
       userId: "",
       displayName: ""
     },
@@ -39,19 +57,9 @@ export default function AboutBook() {
     return data;
   }, []);
 
-  const fetchBookUserState = useCallback(async (bookId, userId) => {
-    if (!userId || !bookId) return null;
-    try {
-      const docRef = doc(db, 'users', userId, 'books', bookId);
-      const docSnap = await getDoc(docRef); 
-      return docSnap.exists() ? docSnap.data() : null;
-    } catch (error) {
-      console.error('Error fetching user book state:', error); 
-      return null;
-    }
-  }, []);
-
-  
+  const handleClickPencil = () => { 
+    setShowModal(true);
+  }; 
 
   useEffect(() => {
     let isMounted = true;
@@ -61,11 +69,14 @@ export default function AboutBook() {
         return;
       } 
       setLoading(true); 
+
       try {
         const [bookData, userState] = await Promise.all([
-          fetchGoogleBookDetails(bookId),
+          fetchGoogleBookDetails(bookId), 
           fetchBookUserState(bookId, user.uid),
         ]);
+        const covers = bookData && bookData.volumeInfo && bookData.volumeInfo ? await getCovers(bookData.volumeInfo) : null;
+        setCovers(covers);
 
         if (isMounted) {
 
@@ -81,6 +92,7 @@ export default function AboutBook() {
               review: userState?.userBookData.review ?? "", 
               readStart: userState?.userBookData.readStart ?? "",
               readEnd: userState?.userBookData.readEnd ?? "",
+              bookCover: userState?.userBookData.bookCover || (covers.length ? covers[0]?.cover_i : ""),
               userId: userState?.userBookData.userId ?? user.uid,
               displayName: userState?.userBookData.displayName ?? "",
             }
@@ -100,13 +112,15 @@ export default function AboutBook() {
     return () => {
       isMounted = false;
     };
-  }, [bookId, user?.uid, fetchGoogleBookDetails, fetchBookUserState]);
+  }, [bookId, user?.uid, fetchGoogleBookDetails, fetchBookUserState, getCovers, setCovers]);
 
   
 
   if (loading || !googleBookData) {
     return <Loading />;
   }
+
+
  
   const handleUpdateBookData = (newUserData) => {
     setBookData((prev) => ({
@@ -122,16 +136,13 @@ export default function AboutBook() {
     <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-start flex-row">
         {/*-------- First Column: Image with Set Width --------*/}
-        <div className="w-30 shrink-0">
-          <img
-            src={
-              googleBookData.volumeInfo.imageLinks?.thumbnail ||
-              "https://dummyimage.com/128x192?text=No+Image"
-            }
-            alt={googleBookData.volumeInfo.title}
-            className="w-32 h-48 object-cover mr-4"
-          />
-        </div>
+      
+        <BookCover
+        editBookCover={handleClickPencil}
+        coverId={bookData?.userBookData?.bookCover}
+        title={googleBookData.volumeInfo.title}
+        />
+        
 
         {/*-------- Second Column: Title & Auuthor --------*/}
         <div className="flex-grow px-4">
@@ -145,13 +156,15 @@ export default function AboutBook() {
         </div>
 
         {/*-------- Third Column: Button with Content-Based Width --------*/}
-        <div className="w-60 ml-auto hidden sm:block">  
-          {bookData ?  <BookMenu onUpdateBookData={handleUpdateBookData} bookData={bookData} bookId={bookId} user={user}/>  : ''}
+        <div className="w-70 ml-auto hidden sm:block">  
+          {bookData ?  <BookMenu onUpdateBookData={handleUpdateBookData} 
+          bookData={bookData} bookId={bookId} user={user} />  : ''}
         </div>
       </div>
 
       <div className="block sm:hidden mt-3">
-      {bookData ?  <BookMenu onUpdateBookData={handleUpdateBookData} bookData={bookData} bookId={bookId} user={user}/>  : ''}
+      {bookData ?  <BookMenu onUpdateBookData={handleUpdateBookData} 
+      bookData={bookData} bookId={bookId} user={user} />  : ''}
       </div>
 
       {/* {Description} */}
@@ -218,6 +231,21 @@ export default function AboutBook() {
         </ul>
       </div>
 
+
+{/* Modal */}
+{showModal ? (
+        <>
+          <BookModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            view={"pageCover"} 
+            googleBookData={bookData.googleBookData}
+            userBookData={bookData.userBookData}
+            onUpdateData={handleUpdateBookData}
+          /> 
+        </>
+      ) : (
+        "")} 
     
     </div>
   );

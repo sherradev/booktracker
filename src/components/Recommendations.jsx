@@ -63,7 +63,7 @@ const Recommendations = () => {
         <div className="flex mb-4 ml-auto">
           <label className="mr-2 font-medium">Genre:</label>
           <select id="genre" value={selectedGenre} onChange={handleGenreChange}>
-            <option value="">All Genres</option>
+    
             {genres.map((genreOption) => (
               <option key={genreOption.value} value={genreOption.value}>
                 {genreOption.label}

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/user-context";
 import { db } from "../config/firebase-config";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
-import BookCard from "../components/BookCard";
+import BookCardGrid from "../components/BookCardGrid";
 import Loading from "../components/Loading";
 
 const Profile = () => {
@@ -15,7 +15,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const handleSignOut = () => {
     // Renamed for clarity
     auth
@@ -30,16 +30,16 @@ const Profile = () => {
       });
   };
 
-  useEffect(() => { 
-    if (user?.uid) { 
+  useEffect(() => {
+    if (user?.uid) {
       const booksRef = collection(db, "users", user.uid, "books");
       const q = query(booksRef, orderBy("userBookData.readEnd", "desc")); // Initial sort by readDate for efficiency
 
       const unsubscribe = onSnapshot(
         q,
         (snapshot) => {
-          const fetchedBooks = []; 
-          snapshot.forEach((doc) => { 
+          const fetchedBooks = [];
+          snapshot.forEach((doc) => {
             fetchedBooks.push(doc.data());
           });
           setAllBooks(fetchedBooks);
@@ -57,8 +57,8 @@ const Profile = () => {
       setLoading(false);
       setAllBooks([]);
     }
-  }, [user]); 
- 
+  }, [user]);
+
   const readBooks = allBooks
     .filter((book) => book.userBookData?.read)
     .sort(
@@ -76,8 +76,7 @@ const Profile = () => {
         (a.userBookData?.likedDate?.toMillis() || 0)
     )
     .slice(0, 6);
-
-  console.log("profile");
+console.log('liked', likedBooks)
   if (loading) {
     return <Loading message="Fetching your books..." />;
   }
@@ -87,38 +86,34 @@ const Profile = () => {
   }
   return (
     <div className="max-w-screen-xl mx-auto px-1 sm:px-6 lg:px-8">
- 
-        <div className="flex items-center justify-end mb-2">
-          <div className="relative">
+      <div className="flex items-center justify-end mb-2">
+        <div className="relative">
           <img
-            src={user.photoURL ? user.photoURL : `https://dummyimage.com/40x40/d2d3d9/d2d3d9`}
+            src={
+              user.photoURL
+                ? user.photoURL
+                : `https://dummyimage.com/40x40/d2d3d9/d2d3d9`
+            }
             alt={`${user.displayName}'s Profile`}
             referrerPolicy="no-referrer"
             className="w-10 h-10 rounded-full mr-4"
           />
-          {user.photoURL ? "" : <span className="absolute top-1/5 left-1/4">G</span>} 
-          </div> 
-          <h2>
-          {user.displayName}</h2>
-          <div className="ml-auto">
-            <button onClick={handleSignOut}>Sign out</button>
-          </div>
-        </div> 
+          {user.photoURL ? (
+            ""
+          ) : (
+            <span className="absolute top-1/5 left-1/4">G</span>
+          )}
+        </div>
+        <h2>{user.displayName}</h2>
+        <div className="ml-auto">
+          <button onClick={handleSignOut}>Sign out</button>
+        </div>
+      </div>
       <h2>History</h2>
       <hr></hr>
       <div className="mt-4 mb-4">
-        {readBooks.length > 0 ? ( 
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-4">
-          {readBooks.map((book, index) => (
-            <div 
-              key={`read-${book.userBookData.bookId}`}
-              className={`  ${index >= 3 ? "hidden md:block" : ""}
-                flex flex-col justify-between h-full border p-1 sm:p-2 rounded shadow hover:shadow-md transition duration-200`}
-            >
-                   <BookCard book={book} />
-            </div>
-          ))}
-        </div>
+        {readBooks.length > 0 ? (
+          <BookCardGrid books={readBooks} label="read" />
         ) : (
           <p>No books marked as read yet.</p>
         )}
@@ -126,19 +121,11 @@ const Profile = () => {
       <h2>Liked Books</h2>
       <hr></hr>
       <div className="mt-4">
-      {likedBooks.length > 0 ? (
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-          {likedBooks.map((book, index) => (
-            <div key={`liked-${book.userBookData.bookId}`} className={`${index >= 3 ? "hidden md:block" : ""}
-            flex flex-col justify-between h-full border p-2 rounded shadow hover:shadow-md transition duration-200`}
-        >
-              <BookCard book={book} />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>No books marked as liked yet.</p>
-      )}
+        {likedBooks.length > 0 ? (
+          <BookCardGrid books={likedBooks} label="liked" />
+        ) : (
+          <p>No books marked as liked yet.</p>
+        )}
       </div>
     </div>
   );

@@ -12,7 +12,6 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorMessage(null);
-    console.log("yo"); // Log user details  
 
     try { 
       console.log("User provider!:", provider); // Log user details  

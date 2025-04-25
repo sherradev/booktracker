@@ -15,7 +15,7 @@ export default function SearchResults() {
       setLoading(true);
       try {
         const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q="${query}"&printType=books&orderBy=newest&maxResults=40`
+          `https://www.googleapis.com/books/v1/volumes?q="${query}"&printType=books&orderBy=newest&maxResults=40&langRestrict=en&projection=lite`
         );
      
         const data = await res.json();

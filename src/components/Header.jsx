@@ -1,13 +1,19 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSearch, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faSearch, faTimes, faPlus } from "@fortawesome/free-solid-svg-icons";
+import BookModal from "./BookModal";
 
 export default function Header() {
   const [showSearch, setShowSearch] = useState(false);
   const mobileSearchInputRef = useRef(null); // Ref for the mobile input
   const desktopSearchInputRef = useRef(null); // Ref for the desktop input
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openBookModal = () => setIsModalOpen(true);
+  const closeBookModal = () => setIsModalOpen(false);
+
   const navigate = useNavigate();
 
   const toggleSearch = () => {
@@ -41,7 +47,17 @@ export default function Header() {
               <h1 className="text-xl font-bold text-gray-800">Book Tracker</h1>
             </Link>
           </div>
+          {isModalOpen ?  <BookModal isOpen={isModalOpen} onClose={closeBookModal} view="search" />:''} 
+          
+        {/* Mobile View */}
           <div className="flex items-center md:hidden">
+            <a className="mr-2" onClick={openBookModal}>
+              <FontAwesomeIcon
+                icon={faPlus}
+                size="lg"
+                className="cursor-pointer"
+              />
+            </a>
             <Link to="/profile" className="mr-2">
               <FontAwesomeIcon
                 icon={faUser}
@@ -77,8 +93,15 @@ export default function Header() {
           </div>
         )}
 
-        {/* Desktop Icons and Search */}
+        {/* Web Icons and Search */}
         <div className="hidden md:flex items-center gap-4 ml-auto relative">
+        <a className="mr-2">
+              <FontAwesomeIcon onClick={openBookModal}
+                icon={faPlus}
+                size="lg"
+                className="cursor-pointer"
+              />
+            </a>
           <Link to="/profile">
             <FontAwesomeIcon
               icon={faUser}

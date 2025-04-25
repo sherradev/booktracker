@@ -5,7 +5,8 @@ const BookCard = ({ book }) => {
   // Safely access nested properties
   const title = book?.googleVolumeData?.title || 'No Title Available';
   const authors = book?.googleVolumeData?.authors || [];
-  const thumbnail = book?.googleVolumeData?.imageLinks?.thumbnail || '';
+  const thumbnail = book?.userBookData?.bookCover ? `https://covers.openlibrary.org/b/id/${book?.userBookData?.bookCover}-M.jpg`:
+      book?.googleVolumeData?.imageLinks?.thumbnail || "https://dummyimage.com/128x192?text=No+Image";
   const bookId = book?.userBookData?.bookId;
 
   return (
