@@ -12,6 +12,7 @@ import {
   faUser,
   faStarHalfAlt,
   faStar,
+  faTimes,
   faHeart
 } from "@fortawesome/free-solid-svg-icons";
 import saveUserBookData from "../utils/save-data";
@@ -105,6 +106,13 @@ const BookModal = ({
     setStarDisplay(stars);  
   }, [userData]);
 
+  const clearSearch = () => {
+    searchInputRef.current.focus();
+    setSearchQuery("");
+    setSuggestions([]); 
+    setSelectedBook(null);
+  }
+
   const handleSearchInputChange = (event) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -130,7 +138,10 @@ const BookModal = ({
         setLoading(true);
         const data = await searchGoogleBooks(query);
         setSuggestions(data);
-        setLoading(false);
+        setLoading(false);  
+        if (searchInputRef.current){
+          searchInputRef.current.blur();
+        }
       } else {
         setSuggestions([]);
         setLoading(false);
@@ -188,7 +199,10 @@ const BookModal = ({
       setLoading(true);
       const data = await searchGoogleBooks(query);
       setSuggestions(data);
-      setLoading(false);
+      setLoading(false); 
+      if (searchInputRef.current){
+        searchInputRef.current.blur();
+      }
     }
   };
 
@@ -368,14 +382,14 @@ const BookModal = ({
         )}
 
         {/* Modal header label */}
-        <h2 className="text-lg font-semibold ">
+        <h2 className="text-lg font-semibold ms-2">
           {currentView === "search" ? "Add book..." : ""}
           {currentView === "review" || currentView === "reviewNoDownload" || currentView === "log" ? "I read..." : ""}
           {currentView === "covers" || currentView === "requiredCover" || currentView === "pageCover" ? "Change Book Cover" : ""}
         </h2>
 
         {/* Modal header right icon */}
-        <a onClick={onCloseModal} className="modal-close-button ml-auto">
+        <a onClick={onCloseModal} className="flex justify-center items-center ml-auto me-1">
           <FontAwesomeIcon
             icon={faClose}
             size="lg"
@@ -403,6 +417,10 @@ const BookModal = ({
                 placeholder="Search..."
                 className="w-full outline-none"
               />
+              {searchQuery ?  <button onClick={clearSearch} className="ml-2">
+                              <FontAwesomeIcon icon={faTimes} />
+                            </button> :''}
+               
             </div>
             <div className="w-full"> 
               {suggestions.length > 0 ? (

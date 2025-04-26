@@ -154,12 +154,14 @@ const Profile = () => {
 
           <div className="flex">
             <h2>History</h2>
+            {readBooks.length > 0 ? 
             <a
               className="cursor-pointer ml-auto"
               onClick={() => onClickNavigateView("history")}
             >
               See All
             </a>
+            : ''}
           </div>
           <hr></hr>
           <div className="mt-4 mb-4">
@@ -174,12 +176,15 @@ const Profile = () => {
           </div>
           <div className="flex">
             <h2>Liked</h2>
+            
+            {likedBooks.length > 0 ? 
             <a
               className="cursor-pointer ml-auto"
               onClick={() => onClickNavigateView("liked")}
             >
               See All
             </a>
+            : ''}
           </div>
           <hr></hr>
           <div className="mt-4">

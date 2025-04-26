@@ -56,7 +56,7 @@ const BookCovers = ({ onSelectCover, bookInfo, view, onCancelCover }) => {
         ) : (
           ""
         )}
-        <div className="overflow-auto h-[90vh] sm:h-[60vh]">
+        <div className="overflow-auto h-[85vh] sm:h-[60vh]">
           {loading ? <Loading /> : ""}
           
             {displayCovers.length ? (
