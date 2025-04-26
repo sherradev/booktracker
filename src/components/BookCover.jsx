@@ -2,7 +2,7 @@ import { useState } from "react";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const BookCover = ({ editBookCover, coverId, title }) => {
+const BookCover = ({ editBookCover, imgURL, title, imgClasses = '' }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = () => {
@@ -15,16 +15,16 @@ const BookCover = ({ editBookCover, coverId, title }) => {
 
   return (
     <div
-      className="bg-white p-0.5 relative"
+      className="bg-white p-0.5 relative overflow-hidden rounded-xl w-full aspect-[3/4]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {isHovered && (
         <div
-          className="absolute top-0 left-0 w-full h-full flex items-center justify-center cursor-pointer"
+          className="absolute  top-0 left-0 w-full h-full flex items-center justify-center cursor-pointer"
           onClick={editBookCover}
         >
-          <div className="absolute top-0 left-0 w-full h-full bg-gray-500 opacity-50"></div>
+          <div className="absolute p-0.5 top-0 left-0 w-full h-full rounded-xl  bg-gray-500 opacity-50"></div>
           <FontAwesomeIcon
             icon={faPencilAlt}
             className="text-white text-sm relative z-10"
@@ -32,16 +32,12 @@ const BookCover = ({ editBookCover, coverId, title }) => {
         </div>
       )}
       <img
-        src={`${
-          coverId
-            ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
-            : "https://dummyimage.com/275x400?text=No+Image"
-        }`}
+        src={imgURL}
         onError={(e) => {
           e.target.onerror = null; // Prevent infinite loop in some browsers
           e.target.src = "https://dummyimage.com/275x400?text=No+Image";
         }}
-        className="w-[100px] h-[150px] object-cover"
+        className={`w-full h-full object-cover rounded-xl  ${imgClasses}`}
         alt={`Book Cover of ${title}`}
       />
     </div>

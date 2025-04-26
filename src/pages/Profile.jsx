@@ -1,20 +1,39 @@
 import React, { useEffect, useState } from "react";
 // import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebase-config";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/user-context";
 import { db } from "../config/firebase-config";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot } from "firebase/firestore";
 import BookCardGrid from "../components/BookCardGrid";
 import Loading from "../components/Loading";
+import { useMyBooks } from "../contexts/my-books-context";
 
+const MAX_DISPLAY = 6;
 const Profile = () => {
   const { user } = useUser();
-  const [allBooks, setAllBooks] = useState([]);
+  const { books, setBooks } = useMyBooks();
+
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentView, setCurrentView] = useState("profile"); //'profile/history/liked
+
+  useEffect(() => {
+    // Grab route after /profile/
+    const viewFromUrl = location.pathname.split("/profile/")[1];
+    if (viewFromUrl) {
+      setCurrentView(viewFromUrl);
+    } else {
+      setCurrentView("profile");
+    }
+  }, [location]);
+
+  const onClickNavigateView = (view) => {
+    navigate(`${view === "profile" ? "/profile" : `/profile/${view}`}`);
+  };
 
   const handleSignOut = () => {
     // Renamed for clarity
@@ -33,16 +52,21 @@ const Profile = () => {
   useEffect(() => {
     if (user?.uid) {
       const booksRef = collection(db, "users", user.uid, "books");
-      const q = query(booksRef, orderBy("userBookData.readEnd", "desc")); // Initial sort by readDate for efficiency
+      const q = query(booksRef); // Initial sort by readDate for efficiency
 
       const unsubscribe = onSnapshot(
         q,
         (snapshot) => {
-          const fetchedBooks = [];
-          snapshot.forEach((doc) => {
-            fetchedBooks.push(doc.data());
-          });
-          setAllBooks(fetchedBooks);
+          // const fetchedBooks = [];
+          const allBooks = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          // snapshot.forEach((doc) => {
+          //   fetchedBooks.push(doc.data());
+          // });
+          setBooks(allBooks);
+          // setAllBooks(fetchedBooks);
           setLoading(false);
         },
         (err) => {
@@ -55,28 +79,36 @@ const Profile = () => {
       return () => unsubscribe();
     } else {
       setLoading(false);
-      setAllBooks([]);
     }
-  }, [user]);
+  }, [user, setBooks]);
+  const getMillis = (date) => {
+    if (!date) return 0;
+    if (typeof date.toMillis === "function") return date.toMillis();
 
-  const readBooks = allBooks
-    .filter((book) => book.userBookData?.read)
-    .sort(
-      (a, b) =>
-        (b.userBookData?.readDate?.toMillis() || 0) -
-        (a.userBookData?.readDate?.toMillis() || 0)
-    )
-    .slice(0, 6);
+    // JS Date
+    if (date instanceof Date) return date.getTime();
+    // ISO String
+    const parsed = Date.parse(date);
+    return isNaN(parsed) ? 0 : parsed;
+  };
 
-  const likedBooks = allBooks
+  const readBooks = books
+  .filter((book) => book.userBookData?.readEnd || book.userBookData?.readStart)  
+  .sort(
+    (a, b) => {
+      const aDate = a.userBookData?.readEnd || a.userBookData?.readStart; 
+      const bDate = b.userBookData?.readEnd || b.userBookData?.readStart;
+      return getMillis(bDate) - getMillis(aDate);
+    }
+  );
+
+  const likedBooks = books
     .filter((book) => book.userBookData?.liked)
     .sort(
       (a, b) =>
-        (b.userBookData?.likedDate?.toMillis() || 0) -
-        (a.userBookData?.likedDate?.toMillis() || 0)
-    )
-    .slice(0, 6);
-console.log('liked', likedBooks)
+        getMillis(b.userBookData?.modifiedDate) - getMillis(a.userBookData?.modifiedDate)
+    );
+ 
   if (loading) {
     return <Loading message="Fetching your books..." />;
   }
@@ -86,47 +118,108 @@ console.log('liked', likedBooks)
   }
   return (
     <div className="max-w-screen-xl mx-auto px-1 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-end mb-2">
-        <div className="relative">
-          <img
-            src={
-              user.photoURL
-                ? user.photoURL
-                : `https://dummyimage.com/40x40/d2d3d9/d2d3d9`
-            }
-            alt={`${user.displayName}'s Profile`}
-            referrerPolicy="no-referrer"
-            className="w-10 h-10 rounded-full mr-4"
-          />
-          {user.photoURL ? (
-            ""
+      {currentView === "history" || currentView === "liked" ? (
+        <div>
+          <button onClick={() => onClickNavigateView("profile")}>Back</button>
+        </div>
+      ) : (
+        ""
+      )}
+
+      {currentView === "profile" ? (
+        <>
+          <div className="flex items-center justify-end mb-2">
+            <div className="relative">
+              <img
+                src={
+                  user.photoURL
+                    ? user.photoURL
+                    : `https://dummyimage.com/40x40/d2d3d9/d2d3d9`
+                }
+                alt={`${user.displayName}'s Profile`}
+                referrerPolicy="no-referrer"
+                className="w-10 h-10 rounded-full mr-4"
+              />
+              {user.photoURL ? (
+                ""
+              ) : (
+                <span className="absolute top-1/5 left-1/4">G</span>
+              )}
+            </div>
+            <h2>{user.displayName}</h2>
+            <div className="ml-auto">
+              <button onClick={handleSignOut}>Sign out</button>
+            </div>
+          </div>
+
+          <div className="flex">
+            <h2>History</h2>
+            <a
+              className="cursor-pointer ml-auto"
+              onClick={() => onClickNavigateView("history")}
+            >
+              See All
+            </a>
+          </div>
+          <hr></hr>
+          <div className="mt-4 mb-4">
+            {readBooks.length > 0 ? (
+              <BookCardGrid
+                books={readBooks.slice(0, MAX_DISPLAY)}
+                label="read"
+              />
+            ) : (
+              <p>No books marked as read yet.</p>
+            )}
+          </div>
+          <div className="flex">
+            <h2>Liked</h2>
+            <a
+              className="cursor-pointer ml-auto"
+              onClick={() => onClickNavigateView("liked")}
+            >
+              See All
+            </a>
+          </div>
+          <hr></hr>
+          <div className="mt-4">
+            {likedBooks.length > 0 ? (
+              <BookCardGrid
+                books={likedBooks.slice(0, MAX_DISPLAY)}
+                label="liked"
+              />
+            ) : (
+              <p>No books marked as liked yet.</p>
+            )}
+          </div>
+        </>
+      ) : (
+        ""
+      )}
+
+      {currentView === "history" ? (
+        <> 
+          {readBooks.length > 0 ? (
+            <BookCardGrid books={readBooks} label="allRead" />
           ) : (
-            <span className="absolute top-1/5 left-1/4">G</span>
-          )}
-        </div>
-        <h2>{user.displayName}</h2>
-        <div className="ml-auto">
-          <button onClick={handleSignOut}>Sign out</button>
-        </div>
-      </div>
-      <h2>History</h2>
-      <hr></hr>
-      <div className="mt-4 mb-4">
-        {readBooks.length > 0 ? (
-          <BookCardGrid books={readBooks} label="read" />
-        ) : (
-          <p>No books marked as read yet.</p>
-        )}
-      </div>
-      <h2>Liked Books</h2>
-      <hr></hr>
-      <div className="mt-4">
-        {likedBooks.length > 0 ? (
-          <BookCardGrid books={likedBooks} label="liked" />
-        ) : (
-          <p>No books marked as liked yet.</p>
-        )}
-      </div>
+            <p>No books marked as liked yet.</p>
+          )} 
+        </>
+      ) : (
+        ""
+      )}
+
+      {currentView === "liked" ? (
+        <> 
+          {likedBooks.length > 0 ? (
+            <BookCardGrid books={likedBooks} label="allLiked" />
+          ) : (
+            <p>No books marked as liked yet.</p>
+          )} 
+        </>
+      ) : (
+        ""
+      )}
     </div>
   );
 };

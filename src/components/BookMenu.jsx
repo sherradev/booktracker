@@ -33,9 +33,9 @@ const BookMenu = ({ bookData, user, onUpdateBookData }) => {
       const readDate = toggledRead ? Timestamp.now() : "";
       const modifiedBookData = {
         read: toggledRead,
-        readStart: readDate,
-        readEnd: readDate,
+        readStart: readDate, 
         inDB: true,
+        modifiedDate: readDate
       };
       updateData(modifiedBookData);
     } catch (error) {
@@ -46,10 +46,18 @@ const BookMenu = ({ bookData, user, onUpdateBookData }) => {
   const handleLike = async () => {
     try {
       const toggledLiked = !bookData.userBookData.liked;
-      const modifiedBookData = {
+      let modifiedBookData = {
         liked: toggledLiked,
         inDB: true,
+        modifiedDate: Timestamp.now()
       };
+      if (toggledLiked && !bookData.userBookData.read){
+        const readDate = toggledLiked ? Timestamp.now() : "";
+        modifiedBookData.read = true;
+        modifiedBookData.readStart = readDate;
+        modifiedBookData.readEnd = readDate;
+      }
+ 
       updateData(modifiedBookData);
     } catch (error) {
       console.error("Error in handleLike", error);
@@ -62,6 +70,7 @@ const BookMenu = ({ bookData, user, onUpdateBookData }) => {
       const modifiedBookData = {
         toRead: toggledtToRead,
         inDB: true,
+        modifiedDate: Timestamp.now()
       };
       updateData(modifiedBookData);
     } catch (error) {
@@ -70,11 +79,16 @@ const BookMenu = ({ bookData, user, onUpdateBookData }) => {
   };
 
   const handleRatingChange = async (newRating) => {
-    try {
+    try { 
+      const readDate = Number(newRating) > 0 ? Timestamp.now() : "";
       setRating(newRating);
       const modifiedBookData = {
         rating: newRating,
         inDB: true,
+        read: Number(newRating) > 0,
+        readStart: readDate,
+        readEnd: readDate,
+        modifiedDate: Timestamp.now()
       };
       updateData(modifiedBookData);
     } catch (error) {

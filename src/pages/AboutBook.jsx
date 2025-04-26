@@ -5,8 +5,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { useUser } from "../contexts/user-context";
 import Loading from "../components/Loading"; 
 import BookMenu from "../components/BookMenu";
-import { useBookCovers } from "../contexts/covers-context";
-import getCovers from "../utils/get-covers";
+// import { useBookCovers } from "../contexts/covers-context";
+// import getCovers from "../utils/get-covers";
 import BookCover from "../components/BookCover";
 import BookModal from "../components/BookModal";
   
@@ -24,7 +24,7 @@ const fetchBookUserState = async (bookId, userId) => {
 export default function AboutBook() { 
   const { id: bookId } = useParams();
   const { user } = useUser(); 
-  const {setCovers} = useBookCovers();
+  // const {setCovers} = useBookCovers();
   const [loading, setLoading] = useState(false); 
   const [expanded, setExpanded] = useState(false); 
   const [showModal, setShowModal] = useState(false);
@@ -44,7 +44,8 @@ export default function AboutBook() {
       readEnd: "",
       bookCover: "",
       userId: "",
-      displayName: ""
+      displayName: "",
+      modifiedDate: ""
     },
   });
   const {googleBookData} = bookData;
@@ -75,8 +76,8 @@ export default function AboutBook() {
           fetchGoogleBookDetails(bookId), 
           fetchBookUserState(bookId, user.uid),
         ]);
-        const covers = bookData && bookData.volumeInfo && bookData.volumeInfo ? await getCovers(bookData.volumeInfo) : null;
-        setCovers(covers);
+        // const covers = bookData && bookData.volumeInfo && bookData.volumeInfo ? await getCovers(bookData.volumeInfo) : null;
+        // setCovers(covers);
 
         if (isMounted) {
 
@@ -92,9 +93,10 @@ export default function AboutBook() {
               review: userState?.userBookData.review ?? "", 
               readStart: userState?.userBookData.readStart ?? "",
               readEnd: userState?.userBookData.readEnd ?? "",
-              bookCover: userState?.userBookData.bookCover || (covers.length ? covers[0]?.cover_i : ""),
+              bookCover: userState?.userBookData.bookCover ?? "",
               userId: userState?.userBookData.userId ?? user.uid,
               displayName: userState?.userBookData.displayName ?? "",
+              modifiedDate: userState?.userBookData.modifiedDate ?? "",
             }
           });
         }
@@ -112,7 +114,7 @@ export default function AboutBook() {
     return () => {
       isMounted = false;
     };
-  }, [bookId, user?.uid, fetchGoogleBookDetails, fetchBookUserState, getCovers, setCovers]);
+  }, [bookId, user?.uid, fetchGoogleBookDetails, fetchBookUserState]);
 
   
 
@@ -136,13 +138,17 @@ export default function AboutBook() {
     <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex items-start flex-row">
         {/*-------- First Column: Image with Set Width --------*/}
-      
+      <div className="max-w-52 max-h-72">
         <BookCover
         editBookCover={handleClickPencil}
+        imgURL={bookData?.userBookData?.bookCover ? 
+          `https://covers.openlibrary.org/b/id/${bookData?.userBookData?.bookCover}-M.jpg`:
+          (googleBookData.volumeInfo.imageLinks?.thumbnail || "https://dummyimage.com/128x192?text=No+Image")
+        } 
         coverId={bookData?.userBookData?.bookCover}
         title={googleBookData.volumeInfo.title}
         />
-        
+        </div>
 
         {/*-------- Second Column: Title & Auuthor --------*/}
         <div className="flex-grow px-4">

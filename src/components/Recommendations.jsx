@@ -82,21 +82,23 @@ const Recommendations = () => {
               key={book.id}
               to={`/book/${book.id}`}
               title={book.volumeInfo.title}
-              className="flex flex-col justify-between h-full border p-2 rounded shadow hover:shadow-md transition duration-200"
+              className="flex flex-col h-full overflow-hidden sm:p-2 rounded-xl shadow hover:shadow-lg transition duration-300"
             >
-              <div className="w-full aspect-[2/3] overflow-hidden mb-2">
+              <div className="overflow-hidden rounded-xl w-full aspect-[3/4]">
                 <img
                   src={
                     book.volumeInfo.imageLinks?.thumbnail ||
                     "https://dummyimage.com/128x192?text=No+Image"
                   }
                   alt={book.volumeInfo.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-xl transform hover:scale-105 transition duration-300"
                 />
               </div>
-              <h2 className="text-sm font-semibold text-center line-clamp-2">
-                {book.volumeInfo.title}
-              </h2>
+              <div className='mt-2 flex-grow flex items-center justify-center px-2 pb-1 sm:pb-0'>
+                <p   className="text-center text-sm font-medium text-gray-700 truncate w-full">
+                  {book.volumeInfo.title}
+                </p>
+              </div> 
             </Link>
           ))}
         </div>

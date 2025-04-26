@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import SearchResults from "./pages/SearchResults";
 import Loading from "./components/Loading";
 import { BookCoversProvider } from "./contexts/covers-context";
+import { MyBooksProvider } from "./contexts/my-books-context";
 
 function App() {
   const { user, checking } = useUser();
@@ -20,17 +21,19 @@ function App() {
       {user ? (
         <div className="flex flex-col min-h-screen">
           <BookCoversProvider>
+            <MyBooksProvider>
             <Header />
-            <main className="p-4 overflow-auto flex-grow">
+            <main className="p-4 overflow-auto flex-grow h-[90vh]">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/book/:id" element={<AboutBook />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/*" element={<Profile />} /> 
                 <Route path="/results" element={<SearchResults />} />
                 <Route path="/login" element={<Login />} />
               </Routes>
             </main>
             <Footer />
+            </MyBooksProvider>
           </BookCoversProvider>
         </div>
       ) : (

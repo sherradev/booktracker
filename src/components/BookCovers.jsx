@@ -1,29 +1,70 @@
-import { useBookCovers } from "../contexts/covers-context"; 
+import React, { useEffect, useCallback, useState } from "react";
+import Loading from "../components/Loading";
+import { useBookCovers } from "../contexts/covers-context";
+import getCovers from "../utils/get-covers";
 
-const BookCovers = ({ onSelectCover }) => { 
-  const { covers } = useBookCovers();  
-   
-  const selectBookCover = (selectedBook) =>{ 
+const BookCovers = ({ onSelectCover, bookInfo, view, onCancelCover }) => {
+  const { covers, setCovers, prevBookId, setPrevBookId } = useBookCovers();
+  const [loading, setLoading] = useState(false);
+  const [displayCovers, setDisplayCovers] = useState([]);
+
+  const fetchCovers = useCallback(
+    async (bookInfo) => {
+      try {
+        const newCovers = await getCovers(bookInfo.volumeInfo);
+        setPrevBookId(bookInfo.id);
+        setCovers(newCovers);
+        setDisplayCovers(newCovers);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch covers:", error);
+        setDisplayCovers([]);
+        setLoading(false);
+      }
+    },
+    [setCovers, setPrevBookId]
+  );
+
+  useEffect(() => {
+    setLoading(true);
+    if (bookInfo?.id) {
+      if (bookInfo.id !== prevBookId) {
+        setDisplayCovers([]);
+        fetchCovers(bookInfo);
+      } else {
+        if (covers && covers.length > 0) {
+          setDisplayCovers(covers);
+        }
+        setLoading(false);
+      }
+    }
+  }, [bookInfo, fetchCovers, prevBookId, setPrevBookId]);
+
+  const selectBookCover = (selectedBook) => {
     onSelectCover(selectedBook);
-  }
+  };
 
   return (
     <>
       <div className="flex flex-col p-2">
-        {covers.length ? (
-          <h5 className="font-bold">Select image to change</h5>
+        {displayCovers.length ? (
+          <h5 className="font-bold">
+            {view === "requiredCover"
+              ? "Kindly select a book cover to continue with the download."
+              : "Select cover to change"}
+          </h5>
         ) : (
-          <h5>No covers found in Open Library</h5>
+          ""
         )}
-        <div className="overflow-auto h-[600px]">
-          {/* {loading ? <Loading /> : ""} */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 mt-2">
-            {covers.length ? (
-              <>
+        <div className="overflow-auto h-[90vh] sm:h-[60vh]">
+          {loading ? <Loading /> : ""}
+          
+            {displayCovers.length ? (
+           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 mt-2">
                 {covers.map((book) => {
                   return (
                     <a
-                      className="flex flex-col aspect-[2/3] h-[250px] md:h-[250px] lg:h-[320px] justify-between w-full border border-e-zinc-500 rounded shadow hover:shadow-md transition duration-200"
+                      className="flex flex-col aspect-[2/3] h-[250px] md:h-[225px]  justify-between w-full border border-e-zinc-500 rounded shadow hover:shadow-md transition duration-200"
                       key={book.cover_i}
                       onClick={() => {
                         selectBookCover(book);
@@ -44,17 +85,15 @@ const BookCovers = ({ onSelectCover }) => {
                     </a>
                   );
                 })}
-              </>
-            ) : (
-              ""
-            )}
           </div>
-        </div>
-        {/* <div className="flex mt-2">
-          <button className="ml-auto px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-            Cancel
-          </button>
-        </div> */}
+            ) :  (
+              view === "requiredCover" ? <div>
+                
+               <div className="mb-2"><button className="bg-gray-200 px-3 py-1  rounded" onClick={()=> onCancelCover()}>Back</button> </div>
+               Sorry we couldn't find any covers on Open Library so unfortunately this book can't be downloaded. 
+                </div>: "We couldn't find any covers on Open Library."
+            )}
+        </div> 
       </div>
     </>
   );

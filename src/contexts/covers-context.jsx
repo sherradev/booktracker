@@ -2,14 +2,17 @@
 
  const BookCoversContext = createContext({
     covers: [],
-    setCovers: () => {}
+    setCovers: () => {},
+    prevBookId: null, 
+    setPrevBookId: () => { }
  });
 
  const BookCoversProvider = ({children}) =>{
     const [covers, setCovers] = useState([]);
+    const [prevBookId, setPrevBookId] = useState(0); 
 
     return (
-        <BookCoversContext.Provider value={{covers, setCovers}}>
+        <BookCoversContext.Provider value={{covers, setCovers, prevBookId, setPrevBookId }}>
                 {children}
         </BookCoversContext.Provider>
     )
