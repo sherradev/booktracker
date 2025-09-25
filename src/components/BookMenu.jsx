@@ -148,7 +148,7 @@ const BookMenu = ({ bookData, user, onUpdateBookData }) => {
       <div className="space-y-2">
         <button
           onClick={()=>setShowModal(true)}
-          className="w-full py-2 text-white rounded bg-black hover:bg-gray-900 "
+          className="w-full py-2 text-white rounded bg-black hover:bg-rose-400 "
         >
           Review or Log
         </button>

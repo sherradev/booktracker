@@ -39,23 +39,23 @@ export default function Header() {
   }, [showSearch]);
 
   return (
-    <header className="w-full py-4 bg-white shadow-md">
+    <header className="w-full py-4 s-secondary text-white shadow-md">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 ">
         <div className="flex justify-between items-center w-full md:w-auto">
           <div className="flex items-center">
             <Link to="/">
-              <h1 className="text-xl font-bold text-gray-800">Book Tracker</h1>
+              <h1 className="text-xl font-bold text-white">Book Tracker</h1>
             </Link>
           </div>
           {isModalOpen ?  <BookModal isOpen={isModalOpen} onClose={closeBookModal} view="search" />:''} 
           
         {/* Mobile View */}
           <div className="flex items-center md:hidden">
-            <a className="mr-2" onClick={openBookModal}>
+            <a className="mr-2 " onClick={openBookModal}>
               <FontAwesomeIcon
                 icon={faPlus}
                 size="lg"
-                className="cursor-pointer"
+                className="cursor-pointer "
               />
             </a>
             <Link to="/profile" className="mr-2">
@@ -95,30 +95,30 @@ export default function Header() {
 
         {/* Web Icons and Search */}
         <div className="hidden md:flex items-center gap-4 ml-auto relative">
-        <a className="mr-2">
+        <a className="mr-1">
               <FontAwesomeIcon onClick={openBookModal}
                 icon={faPlus}
                 size="lg"
-                className="cursor-pointer"
+                className="cursor-pointer text-white hover:text-rose-400"
               />
             </a>
           <Link to="/profile">
             <FontAwesomeIcon
               icon={faUser}
               size="lg"
-              className="cursor-pointer"
+              className="cursor-pointer text-white hover:text-rose-400"
             />
           </Link>
 
           {!showSearch && (
             <button onClick={toggleSearch}>
-              <FontAwesomeIcon icon={faSearch} size="lg" className=""/>
+              <FontAwesomeIcon icon={faSearch} size="lg" className="text-white hover:text-rose-400"/>
             </button>
           )}
 
           {showSearch && (
             <div className="flex items-center border rounded-lg px-3 py-1">
-              <FontAwesomeIcon icon={faSearch} className="mr-2" />
+              <FontAwesomeIcon icon={faSearch} className="mr-2 text-white hover:text-rose-400" />
               <input
                 type="text"
                 value={searchTerm}

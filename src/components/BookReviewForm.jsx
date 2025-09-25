@@ -112,7 +112,7 @@ const BookReviewForm = ({
   }, [userBookData]);
 
   return (
-    <div className="max-h-[95vh] overflow-x-hidden overflow-y-auto">
+    <div className="max-h-[95vh] overflow-x-hidden overflow-y-auto bg-white rounded-b-lg">
       <div className="flex p-3">
         <div className="w-60 max-w-52 min-w-30">
           <BookCover
@@ -135,7 +135,7 @@ const BookReviewForm = ({
                 __html: googleBookData.volumeInfo.title,
               }}
             />
-            <h3 className="text-gray-600 text-sm">
+            <h3 className="text-gray-800 text-sm">
               {googleBookData.volumeInfo.authors ? (
                 <span>{`by ${googleBookData.volumeInfo.authors.join(
                   ", "
@@ -251,7 +251,7 @@ const BookReviewForm = ({
                 />
               </div>
               <label
-                className="ml-2 text-gray-700 cursor-pointer select-none"
+                className="ml-2 text-gray-800 cursor-pointer select-none"
                 onClick={toggleDownloadCheckbox}
               >
                 Download on Save

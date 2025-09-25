@@ -20,7 +20,7 @@ const BookCardGrid = React.memo(({ books, label }) => {
           key={`${label}-${book.userBookData.bookId}`}
           className={`${
             index >= 3 ? "hidden md:block" : ""
-          } flex flex-col h-full overflow-hidden sm:p-2 rounded-xl shadow hover:shadow-lg transition duration-300`}
+          } flex flex-col h-full overflow-hidden sm:p-2 rounded-xl shadow hover:shadow-lg transition duration-300 s-secondary text-white`}
         >
           <BookCard book={book} />
         </div>

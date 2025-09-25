@@ -5,6 +5,8 @@
 body {
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
+  
+    background-color: #181B20;
 }
 
 * {
@@ -14,3 +16,11 @@ body {
 button{
   cursor: pointer;
 }
+
+.s-primary {
+    background-color: #181B20;
+}
+
+.s-secondary {
+  background-color: #2B3037;
+} 

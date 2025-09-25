@@ -180,11 +180,11 @@ export default function AboutBook() {
           <div className="text-gray-700">
             <p
               className={
-                expanded ? "" : "line-clamp-4 max-h-32 overflow-hidden"
+                expanded ? "text-gray-50 " : "line-clamp-4 max-h-32 overflow-hidden text-gray-50"
               }
             >
               <span
-                className="book-description mb-4"
+                className="book-description mb-4 "
                 dangerouslySetInnerHTML={{ __html: description }}
               ></span>
             </p>
@@ -199,7 +199,7 @@ export default function AboutBook() {
 
         {/* Web view */}
         <div className="hidden md:block">
-          <div className="text-gray-700">
+          <div className="text-gray-400">
             <span
               className="book-description mb-4"
               dangerouslySetInnerHTML={{ __html: description }}

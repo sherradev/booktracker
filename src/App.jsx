@@ -23,7 +23,7 @@ function App() {
           <BookCoversProvider>
             <MyBooksProvider>
             <Header />
-            <main className="p-4 overflow-auto flex-grow h-[90vh]">
+            <main className="p-4 overflow-auto flex-grow h-[90vh] text-white s-primary">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/book/:id" element={<AboutBook />} />

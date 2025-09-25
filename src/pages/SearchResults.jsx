@@ -58,7 +58,7 @@ export default function SearchResults() {
                 <Link
                   key={book.id}
                   to={`/book/${book.id}`}
-                   className="flex flex-col h-full overflow-hidden sm:p-2 rounded-xl shadow hover:shadow-lg transition duration-300"
+                   className="flex flex-col h-full overflow-hidden sm:p-2 rounded-xl shadow hover:shadow-lg transition duration-300 s-secondary text-white"
                 >
                               <div className="overflow-hidden rounded-xl w-full aspect-[3/4]">
                     <img
@@ -72,7 +72,7 @@ export default function SearchResults() {
                     />
                   </div>
                   <div className='mt-2 flex-grow flex items-center justify-center px-2 pb-1 sm:pb-0'>
-                <p className="text-center text-sm font-medium text-gray-700 truncate w-full">
+                <p className="text-center text-sm font-medium text-white truncate w-full">
                   {book.volumeInfo.title}
                 </p>
               </div> 

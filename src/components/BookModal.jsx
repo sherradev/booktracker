@@ -358,7 +358,7 @@ const BookModal = ({
 
   return (
     // w-full sm:w-3/4 lg:w-1/2 h-full sm:h-[700px] overflow-y-hidden
-    <Modal container=" h-auto">
+    <Modal container=" h-auto s-secondary text-gray-800 ">
       {loading ? <Loading /> : ""} 
       { showConfirm ?  <ConfirmationModal text={`Warning: If you uncheck Finished reading, 
       any changes on this book will be lost. Only the 'started reading' date will remain. Do you want to continue?`}
@@ -366,7 +366,7 @@ const BookModal = ({
 
 
       {/* Modal header start */}
-      <div className="w-full flex border-b-gray-400 border-b-[0.5px] p-2">
+      <div className="bg-white w-full flex border-b-[0.25px] p-2 rounded-t-lg">
         {/* Modal header left icon */}
         {currentView === "review" || currentView === "covers" ? (
           <button
@@ -400,7 +400,7 @@ const BookModal = ({
       {/* Modal header end */}
 
       {/* Modal content start */}
-      <div className="">
+      <div className="bg-white">
         {/* --- SEARCH VIEW --- */}
         {currentView === "search" && (
           <div className="max-h-screen p-3">
@@ -429,7 +429,7 @@ const BookModal = ({
                     <li
                       key={book.id}
                       onClick={() => handleSuggestionClick(book)}
-                      className="h-full p-2 hover:bg-green-100 hover:rounded-lg hover:cursor-pointer"
+                      className="h-full p-2 hover:bg-rose-400 hover:rounded-lg hover:cursor-pointer"
                     >
                       <span>{book.volumeInfo.title}</span>
                       {book.volumeInfo && book.volumeInfo.publishedDate
