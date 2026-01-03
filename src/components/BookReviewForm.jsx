@@ -227,7 +227,7 @@ const BookReviewForm = ({
             value={reviewText}
             onChange={handleChangeReview}
             placeholder="Write your review here..."
-            className="w-full border rounded-lg mt-1 h-[20vh] sm:h-[15vh] resize-none p-2"
+            className="w-full border rounded-lg mt-1 h-[15vh] sm:h-[15vh] resize-none p-2"
           />
           <label style={reviewTextStyle}>
             {reviewText.length} / {CHAR_LIMIT} characters

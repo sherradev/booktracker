@@ -17,12 +17,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import saveUserBookData from "../utils/save-data";
 import { useUser } from "../contexts/user-context";
-import FormatDate from "../utils/time-formatter";
-import html2canvas from "html2canvas";
+import FormatDate from "../utils/time-formatter"; 
 import { searchGoogleBooks } from "../api/search-google";
 import getCovers from "../utils/get-covers";
 import { useBookCovers } from "../contexts/covers-context";
 import ConfirmationModal from "./ConfirmationModal";
+import html2canvas from 'html2canvas-pro';
 
 const DEBOUNCE_DELAY = 1000;
 const BookModal = ({
@@ -575,7 +575,7 @@ const BookModal = ({
                             style={{
                               marginLeft: "10px",
                               position: "relative",
-                              top: "-15px",
+                              top: "-5px",
                               fontSize: "1.5em",
                               color: "#686868",
                             }}
@@ -590,7 +590,7 @@ const BookModal = ({
                           fontSize: "2.5em",
                           fontWeight: "bold",
                           color: "#2C2C2C",
-                          marginTop: "-10px",
+                          marginTop: "5px",
                           marginBottom: "10px",
                           lineHeight: 1,
                         }}
@@ -605,7 +605,7 @@ const BookModal = ({
                       >
                         By{" "}
                         {selectedBook.volumeInfo.authors ? (
-                          <span>{`By ${selectedBook.volumeInfo.authors.join(
+                          <span>{`${selectedBook.volumeInfo.authors.join(
                             ", "
                           )}`}</span>
                         ) : (
