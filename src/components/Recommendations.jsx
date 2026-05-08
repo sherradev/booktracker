@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import Loading from "../components/Loading";
+import { searchGoogleBooks } from "../api/search-google";
 
 const genres = [
   { label: "Fiction", value: "fiction" },
@@ -24,12 +25,13 @@ const Recommendations = () => {
   const [selectedGenre, setSelectedGenre] = useState("");
 
   const fetchBooks = async (genre, startIndex) => {
+    console.log('genre',genre)
     setLoading(true);
     try {
-      let apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${genre}&printType=books&orderBy=newest&maxResults=${MAX_API_RESULTS}&startIndex=${startIndex}`;
-      const res = await fetch(apiUrl);
-      const data = await res.json();
-      setBooks(data.items || []);
+
+      const items = await searchGoogleBooks('', genre);
+      console.log('ite',items)
+      setBooks(items || []);
     } catch (error) {
       console.error("Failed to fetch books:", error);
     } finally {
@@ -60,10 +62,28 @@ const Recommendations = () => {
     fetchBooks(value, getRandomIndex());
   };
 
-  useEffect(() => {
-    handleRefresh();
-  }, []);
+// 1. Pick the random genre once when the component instance is created
+const initialGenre = useRef(genres[Math.floor(Math.random() * genres.length)].value);
 
+useEffect(() => {
+  let isMounted = true;
+
+  const loadInitialBooks = async () => {
+    // 2. Use the "locked-in" value from the ref
+    await fetchBooks(initialGenre.current, getRandomIndex());
+    
+    if (isMounted) {
+      console.log(`Initial load successful for: ${initialGenre.current}`);
+    }
+  };
+
+  loadInitialBooks();
+
+  return () => {
+    isMounted = false;
+  };
+}, []); // Empty dependency array
+ 
   return (
     <div className="flex flex-col max-w-screen-xl px-2 sm:px-6 lg:px-8 mb-5">
       <div className="">

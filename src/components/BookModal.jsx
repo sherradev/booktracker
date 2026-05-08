@@ -429,7 +429,7 @@ const BookModal = ({
                     <li
                       key={book.id}
                       onClick={() => handleSuggestionClick(book)}
-                      className="h-full p-2 hover:bg-rose-400 hover:rounded-lg hover:cursor-pointer"
+                      className="h-full p-2 hover:bg-rose-400 hover:text-white hover:rounded-lg hover:cursor-pointer"
                     >
                       <span>{book.volumeInfo.title}</span>
                       {book.volumeInfo && book.volumeInfo.publishedDate
@@ -438,7 +438,7 @@ const BookModal = ({
                             "yyyy"
                           )})`
                         : ""}{" "}
-                      <small className="text-gray-600">
+                      <small className="">
                         by{" "}
                         {book.volumeInfo &&
                         book.volumeInfo.authors &&

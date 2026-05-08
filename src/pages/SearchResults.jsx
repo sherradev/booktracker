@@ -14,9 +14,10 @@ export default function SearchResults() {
     const fetchBooks = async () => {
       setLoading(true);
       try {
+        const API_KEY = import.meta.env.VITE_BOOKS_API_KEY;
         const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q="${query}"&printType=books&orderBy=newest&maxResults=40&langRestrict=en&projection=lite`
-        );
+  `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${API_KEY}&printType=books&orderBy=newest&maxResults=40&langRestrict=en&projection=lite`
+);
      
         const data = await res.json();
         setAllBooks(data.items || []);

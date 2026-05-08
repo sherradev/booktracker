@@ -52,7 +52,11 @@ export default function AboutBook() {
   const description = googleBookData?.volumeInfo.description || "No description available.";
 
   const fetchGoogleBookDetails = useCallback(async (bookId) => {
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`);
+    const API_KEY = import.meta.env.VITE_BOOKS_API_KEY;
+   
+    const url = `https://www.googleapis.com/books/v1/volumes/${bookId}?key=${API_KEY}`;
+    
+    const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch book details");
     const data = await res.json();
     return data;
